@@ -1,6 +1,6 @@
 void compileNuMIFlux(){
 
-  gSystem->Load("../FluxNtuple_C.so");
+  gSystem->Load("FluggNtuple/FluxNtuple_C.so");
   .L NuMIFlux.cc+
 
 }
