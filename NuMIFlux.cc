@@ -10,10 +10,11 @@ using namespace std;
 #include "TRandom.h"
 #include "TRotation.h"
 #include "TMath.h"
+#include "TH1.h"
+#include "TFile.h"
 
 #include "NuMIFlux.hh"
-
-#include "FluxNtuple.h"
+#include "FluggNtuple/FluxNtuple.h"
 
 //#include "dk2nu.h"
 //#include "dkmeta.h"
@@ -71,12 +72,22 @@ void NuMIFlux::CalculateFlux() {
       if (ret != 0) cout << "Error with calcEnuWgt. Return " << ret << endl;
       if (debug) cout << "wgt_xy " << wgt_xy << endl;
 
+      // Fill the histogram
+      double weight = wgt_xy * fluxNtuple.Nimpwt * fDefaultWeightCorrection;
+      nuFluxHisto->Fill(enu, weight);
+
       // POT stuff
       if ( fluxNtuple.evtno > highest_evtno ) 
         highest_evtno = fluxNtuple.evtno;
 
     }
   } // end of loop over the entries
+
+  double scale = NominalPOT/highest_evtno;
+  nuFluxHisto->Scale(scale);
+
+  nuFluxHisto->Write();
+  f->Close();
 
   cout << "POT: " << highest_evtno << endl;
 

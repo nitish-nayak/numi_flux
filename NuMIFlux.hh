@@ -8,10 +8,12 @@
 using namespace std;
 
 #include "TChain.h"
+#include "TH1.h"
+#include "TFile.h"
 #include "TSystem.h"
 #include "TVector3.h"
 
-#include "FluxNtuple.h"
+#include "FluggNtuple/FluxNtuple.h"
 //#include "calcLocationWeights.h"
 
 class NuMIFlux {
@@ -19,9 +21,15 @@ public :
 
   int numu = 56;
   int highest_evtno = 0;
+  double NominalPOT = 6e20;
   bool debug = false;
+  double fDefaultWeightCorrection = 1./(10000. * TMath::Pi());
 
   TChain *cflux;
+
+  TH1D* nuFluxHisto = new TH1D("nuFluxHisto", "Neutrino Flux; True neutrino energy [GeV];#nu_{#mu} / cm^{2} / ? POT",50,0,6);
+  TFile* f = new TFile("NuMIFlux.root", "RECREATE");
+
 
   NuMIFlux(string pattern="/uboone/data/flux/numi/current/flugg_mn000z200i_20101117.gpcfgrid_lowth/flugg_mn000z200i_20101117.gpcfgrid_lowth_001.root");
   virtual ~NuMIFlux();
