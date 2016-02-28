@@ -12,6 +12,7 @@ Run with:
 
 ```
 root -l
+>gSystem->Load("FluggNtuple/FluxNtuple_C.so");
 > gSystem->Load("NuMIFlux_cc.so");
 > NuMIFlux f;
 > f.CalculateFlux();

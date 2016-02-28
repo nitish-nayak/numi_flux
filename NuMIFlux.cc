@@ -12,6 +12,7 @@ using namespace std;
 #include "TMath.h"
 #include "TH1.h"
 #include "TFile.h"
+#include "TGraph.h"
 
 #include "NuMIFlux.hh"
 #include "FluggNtuple/FluxNtuple.h"
@@ -43,16 +44,16 @@ void NuMIFlux::CalculateFlux() {
 
   FluxNtuple fluxNtuple(cflux);//  = new FluxNtuple(cflux);
 
-//***************************************
-//
-//  Loop over the entries.
-//
-//***************************************
+  //***************************************
+  //
+  //  Loop over the entries.
+  //
+  //***************************************
 
   Long64_t nflux = cflux->GetEntries();
   std::cout << "Total number of entries: " << nflux << std::endl;
   for (Long64_t i=0; i < nflux; ++i ) {
-    if (i % 1000 == 0) cout << "On entry " << i << endl;
+    if (i % 100000 == 0) cout << "On entry " << i << endl;
     cflux->GetEntry(i);
 
     if (fluxNtuple.Ntype == numu) {
@@ -83,9 +84,50 @@ void NuMIFlux::CalculateFlux() {
     }
   } // end of loop over the entries
 
-  double scale = NominalPOT/highest_evtno;
+  double AccumulatedPOT = estimate_pots(highest_evtno) * Nfiles;
+  double scale = NominalPOT/AccumulatedPOT;
   nuFluxHisto->Scale(scale);
 
+  //***************************************
+  //
+  // Apply now GENIE xsec
+  //
+  // root -l  $GENIEXSECPATH/xsec_graphs.root
+  // >  _file0->cd("nu_mu_Ar40")
+  // >  tot_cc->Draw()
+  //
+  //***************************************
+
+  const char* genieXsecPath = gSystem->ExpandPathName("$(GENIEXSECPATH)");
+  if ( !genieXsecPath ) {
+    std::cout << "$(GENIEXSECPATH) not defined." << std::endl;
+    std::cout << "Please setup *genie_xsec*. (setup genie_xsec R-2_8_0   -q default)." << std::endl; 
+  }
+  TString genieXsecFileName = genieXsecPath;
+  genieXsecFileName += "/xsec_graphs.root";
+  TFile *genieXsecFile = new TFile(genieXsecFileName,"READ");
+  genieXsecFile->cd("nu_mu_Ar40");
+  TGraph *genieXsecNumuCC = (TGraph *) gDirectory->Get("tot_cc");
+  genieXsecFile->Close();
+
+  // TSpline3* genieXsecSplineNumuCC = new TSpline3("genieXsecSplineNumuCC", genieXsecNumuCC, "", 0,6);
+
+
+  double value;
+  for(int i=1; i<histNbins+1; i++) {
+    value = nuFluxHisto->GetBinContent(i);
+    value *= genieXsecNumuCC->Eval(nuFluxHisto->GetBinCenter(i)); // Eval implies linear interpolation
+    value *= (1e-38 * Ntarget/40.); // 1/40 is due to I'm considering nu_mu_Ar40.
+    nuCCHisto->SetBinContent(i,value);
+
+  }
+
+
+
+
+  f->cd();
+  nuCCHisto->Write();
+  genieXsecNumuCC->Write();
   nuFluxHisto->Write();
   f->Close();
 
@@ -100,9 +142,9 @@ TVector3 NuMIFlux::RandomInTPC() {
     TDatime *d = new TDatime;
     TRandom *r = new TRandom(d->GetTime());
     
-    double xTPC = 260.;  // cm
-    double yTPC = 256.;  // cm
-    double zTPC = 1045.; // cm
+    double xTPC = 256.35;  // cm
+    double yTPC = 233.;  // cm
+    double zTPC = 1036.8; // cm
     
     double x = r->Uniform(0., xTPC);
     double y = r->Uniform(-yTPC/2., yTPC/2.);
@@ -149,6 +191,28 @@ TVector3 NuMIFlux::FromDetToBeam( const TVector3& det ) {
     
     return beam;
 }
+
+
+
+//___________________________________________________________________________
+double NuMIFlux::estimate_pots(int highest_potnum) {
+
+  // looks like low counts are due to "evtno" not including                     
+  // protons that miss the actual target (hit baffle, etc)
+  // this will vary with beam conditions parameters
+  // so we should round way up, those generating flugg files
+  // aren't going to quantize less than 1000
+  // though 500 would probably be okay, 100 would not.
+  // also can't use _last_ potnum because muons decays don't
+  // have theirs set
+
+  const Int_t    nquant = 1000; // 500;  // 100                                 
+  const Double_t rquant = nquant;
+
+  Int_t estimate = (TMath::FloorNint((highest_potnum-1)/rquant)+1)*nquant;
+  return estimate;
+}
+
 
 
 //___________________________________________________________________________
