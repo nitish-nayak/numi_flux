@@ -14,6 +14,12 @@ root -l
 > f.CalculateFlux();
 ```
 
+or use the python script:
+
+```
+source SetupNuMIFlux.sh
+python RunNuMIFlux.py
+```
 
 Compile with:
 
