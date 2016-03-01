@@ -39,7 +39,12 @@ void NuMIFlux::CalculateFlux() {
     gSystem->Load("FluxNtuple_C.so");
   }
 */
-
+/*
+  const int numu  = 56;
+  const int anumu = 55;
+  const int nue   = 53;
+  const int anue  = 52;
+*/
   //TTree * tree = new TTree();
 
   FluxNtuple fluxNtuple(cflux);//  = new FluxNtuple(cflux);
@@ -53,45 +58,83 @@ void NuMIFlux::CalculateFlux() {
   Long64_t nflux = cflux->GetEntries();
   std::cout << "Total number of entries: " << nflux << std::endl;
   for (Long64_t i=0; i < nflux; ++i ) {
-    if (i % 100000 == 0) cout << "On entry " << i << endl;
+
+    // Get entry i. fluxNtuple is now filled with entry i info.
     cflux->GetEntry(i);
 
-    if (fluxNtuple.Ntype == numu) {
-      double wgt_xy = 0.;  // neutrino weight
-      double enu    = 0.;  // neutrino energy in lab frame
-
-      // Pick a random point in the TPC (in detector coordinates)
-      TVector3 xyz_det = RandomInTPC();
-      if (debug) cout << "xyz_det = [" << xyz_det.X() << ", " << xyz_det.Y() << ", " << xyz_det.Z() << "]" << endl;
-
-      // From detector to beam coordinates
-      TVector3 xyz_beam = FromDetToBeam(xyz_det);
-      if (debug) cout << "xyz_beam = [" << xyz_beam.X() << ", " << xyz_beam.Y() << ", " << xyz_beam.Z() << "]" << endl;   
- 
-      // Calculate the weight
-      int ret = calcEnuWgt(fluxNtuple, xyz_beam, enu, wgt_xy);     
-      if (ret != 0) cout << "Error with calcEnuWgt. Return " << ret << endl;
-      if (debug) cout << "wgt_xy " << wgt_xy << endl;
-
-      // Fill the histogram
-      double weight = wgt_xy * fluxNtuple.Nimpwt * fDefaultWeightCorrection;
-      nuFluxHisto->Fill(enu, weight);
-
-      // POT stuff
-      if ( fluxNtuple.evtno > highest_evtno ) 
-        highest_evtno = fluxNtuple.evtno;
-
+    // Alert the user
+    if (i % 100000 == 0) cout << "On entry " << i << endl;
+    if(treeNumber != cflux->GetTreeNumber()) {
+      treeNumber = cflux->GetTreeNumber();
+      std::cout << "Moving to tree number " << treeNumber << "." << std::endl;	
+      AccumulatedPOT += estimate_pots(highest_evtno);
+      cout << "AccumulatedPOT: " << AccumulatedPOT << endl;
     }
+
+    double wgt_xy = 0.;  // neutrino weight
+    double enu    = 0.;  // neutrino energy in lab frame
+
+    // Pick a random point in the TPC (in detector coordinates)
+    TVector3 xyz_det = RandomInTPC();
+    if (debug) cout << "xyz_det = [" << xyz_det.X() << ", " << xyz_det.Y() << ", " << xyz_det.Z() << "]" << endl;
+
+    // From detector to beam coordinates
+    TVector3 xyz_beam = FromDetToBeam(xyz_det);
+    if (debug) cout << "xyz_beam = [" << xyz_beam.X() << ", " << xyz_beam.Y() << ", " << xyz_beam.Z() << "]" << endl;   
+ 
+    // Calculate the weight
+    int ret = calcEnuWgt(fluxNtuple, xyz_beam, enu, wgt_xy);     
+    if (ret != 0) cout << "Error with calcEnuWgt. Return " << ret << endl;
+    if (debug) cout << "wgt_xy " << wgt_xy << endl;
+
+    // Calculate the total weight
+    double weight = wgt_xy * fluxNtuple.Nimpwt * fDefaultWeightCorrection;
+
+    // Fill the histograms
+    switch (fluxNtuple.Ntype) {
+      case numu:
+        numuFluxHisto->Fill(enu, weight);
+        break;
+      case anumu:
+        anumuFluxHisto->Fill(enu, weight);
+        break;
+      case nue:
+        nueFluxHisto->Fill(enu, weight);
+        break;
+      case anue:
+        anueFluxHisto->Fill(enu, weight);
+        break; 
+    }
+
+    // POT stuff
+    if ( fluxNtuple.evtno > highest_evtno ) 
+      highest_evtno = fluxNtuple.evtno;
+
   } // end of loop over the entries
 
-  double AccumulatedPOT = estimate_pots(highest_evtno) * Nfiles;
+
+  //***************************************
+  //
+  // POT scaling
+  //
+  //***************************************
+
+  //double AccumulatedPOT = estimate_pots(highest_evtno) * Nfiles;
+  AccumulatedPOT += estimate_pots(highest_evtno); // To account for last tree
   double scale = NominalPOT/AccumulatedPOT;
-  nuFluxHisto->Scale(scale);
+  numuFluxHisto->Scale(scale);
+  anumuFluxHisto->Scale(scale);
+  nueFluxHisto->Scale(scale);
+  anueFluxHisto->Scale(scale);
+  cout << endl << ">>> TOTAL POT: " << AccumulatedPOT << endl << endl;
+
 
   //***************************************
   //
   // Apply now GENIE xsec
   //
+  // source /nusoft/app/externals/setup
+  // setup genie_xsec R-2_8_0   -q default
   // root -l  $GENIEXSECPATH/xsec_graphs.root
   // >  _file0->cd("nu_mu_Ar40")
   // >  tot_cc->Draw()
@@ -103,35 +146,45 @@ void NuMIFlux::CalculateFlux() {
     std::cout << "$(GENIEXSECPATH) not defined." << std::endl;
     std::cout << "Please setup *genie_xsec*. (setup genie_xsec R-2_8_0   -q default)." << std::endl; 
   }
-  TString genieXsecFileName = genieXsecPath;
-  genieXsecFileName += "/xsec_graphs.root";
-  TFile *genieXsecFile = new TFile(genieXsecFileName,"READ");
-  genieXsecFile->cd("nu_mu_Ar40");
-  TGraph *genieXsecNumuCC = (TGraph *) gDirectory->Get("tot_cc");
-  genieXsecFile->Close();
 
-  // TSpline3* genieXsecSplineNumuCC = new TSpline3("genieXsecSplineNumuCC", genieXsecNumuCC, "", 0,6);
+  if ( genieXsecPath ) {
+    TString genieXsecFileName = genieXsecPath;
+    genieXsecFileName += "/xsec_graphs.root";
+    TFile *genieXsecFile = new TFile(genieXsecFileName,"READ");
+    genieXsecFile->cd("nu_mu_Ar40");
+    genieXsecNumuCC = (TGraph *) gDirectory->Get("tot_cc");
+    genieXsecFile->Close();
+
+    // TSpline3* genieXsecSplineNumuCC = new TSpline3("genieXsecSplineNumuCC", genieXsecNumuCC, "", 0,6);
+
+    double value;
+    for(int i=1; i<histNbins+1; i++) {
+      value = numuFluxHisto->GetBinContent(i);
+      value *= genieXsecNumuCC->Eval(numuFluxHisto->GetBinCenter(i)); // Eval implies linear interpolation
+      value *= (1e-38 * Ntarget/40.); // 1/40 is due to I'm considering nu_mu_Ar40.
+      nuCCHisto->SetBinContent(i,value);
+    }
+  } // end if ( genieXsecPath )
 
 
-  double value;
-  for(int i=1; i<histNbins+1; i++) {
-    value = nuFluxHisto->GetBinContent(i);
-    value *= genieXsecNumuCC->Eval(nuFluxHisto->GetBinCenter(i)); // Eval implies linear interpolation
-    value *= (1e-38 * Ntarget/40.); // 1/40 is due to I'm considering nu_mu_Ar40.
-    nuCCHisto->SetBinContent(i,value);
-
-  }
 
 
-
+  //***************************************
+  //
+  // Writing on file
+  //
+  //***************************************
 
   f->cd();
-  nuCCHisto->Write();
-  genieXsecNumuCC->Write();
-  nuFluxHisto->Write();
+  numuFluxHisto->Write();
+  anumuFluxHisto->Write();
+  nueFluxHisto->Write();
+  anueFluxHisto->Write();
+  if ( genieXsecPath ) {
+    nuCCHisto->Write();
+    genieXsecNumuCC->Write();
+  }
   f->Close();
-
-  cout << "POT: " << highest_evtno << endl;
 
 }
 
@@ -197,6 +250,7 @@ TVector3 NuMIFlux::FromDetToBeam( const TVector3& det ) {
 //___________________________________________________________________________
 double NuMIFlux::estimate_pots(int highest_potnum) {
 
+  // Stolen: https://cdcvs.fnal.gov/redmine/projects/dk2nu/repository/show/trunk/dk2nu
   // looks like low counts are due to "evtno" not including                     
   // protons that miss the actual target (hit baffle, etc)
   // this will vary with beam conditions parameters
@@ -206,7 +260,8 @@ double NuMIFlux::estimate_pots(int highest_potnum) {
   // also can't use _last_ potnum because muons decays don't
   // have theirs set
 
-  const Int_t    nquant = 1000; // 500;  // 100                                 
+  // Marco: Trying with 10000
+  const Int_t    nquant = 10000; //1000; // 500;  // 100                                 
   const Double_t rquant = nquant;
 
   Int_t estimate = (TMath::FloorNint((highest_potnum-1)/rquant)+1)*nquant;
@@ -219,6 +274,8 @@ double NuMIFlux::estimate_pots(int highest_potnum) {
 int NuMIFlux::calcEnuWgt( FluxNtuple& decay, const TVector3& xyz,
                          double& enu, double& wgt_xy)
 {
+
+    // Stolen: https://cdcvs.fnal.gov/redmine/projects/dk2nu/repository/show/trunk/dk2nu
     // Neutrino Energy and Weight at arbitrary point
     // Based on:
     //   NuMI-NOTE-BEAM-0109 (MINOS DocDB # 109)
