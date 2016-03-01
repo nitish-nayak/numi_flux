@@ -1,19 +1,33 @@
 # NuMIFlux
 Code to calculate the NuMI Flux at MicroBooNE
 
-Setup ROOT:
-
-```
-source /nusoft/app/externals/setup
-setup root   v5_34_18a   -q e5:debug:nu
-```
 
 Run with:
 
 ```
+source SetupNuMIFlux.sh
+
 root -l
->gSystem->Load("FluggNtuple/FluxNtuple_C.so");
+> gSystem->Load("FluggNtuple/FluxNtuple_C.so");
 > gSystem->Load("NuMIFlux_cc.so");
 > NuMIFlux f;
 > f.CalculateFlux();
+```
+
+
+Compile with:
+
+```
+root -l
+> gSystem->Load("FluggNtuple/FluxNtuple_C.so");
+> .L NuMIFlux.cc+
+```
+
+
+Generate new FluxNtuple_C.so:
+
+```
+cd FluggNtuple
+root -l
+.L FluxNtuple.C+
 ```
