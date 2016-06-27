@@ -35,10 +35,12 @@ public :
   int treeNumber = -1;
 
   double histMin = 0;
-  double histMax = 6;
-  int histNbins = 120;
+  double histMax = 20;
+  int histNbins = 400;
 
   TChain *cflux;
+
+  FluxNtuple *fluxNtuple;
 
   TH1D* numuFluxHisto;
   TH1D* anumuFluxHisto;
@@ -49,14 +51,16 @@ public :
   TFile* f = new TFile("NuMIFlux.root", "RECREATE");
 
 
-  NuMIFlux(string pattern="/uboone/data/flux/numi/current/flugg_mn000z200i_20101117.gpcfgrid_lowth/flugg_mn000z200i_20101117.gpcfgrid_lowth_00*.root");
+  NuMIFlux(string pattern="/uboone/data/flux/numi/v2/flugg_mn000z200i_rp11_lowth_pnut_f112c0f093bbird/flugg_mn000z200i_rp11_bs1.1_pnut_lowth_f112c0f093bbird_0*.root");
+//"/uboone/data/flux/numi/current/flugg_mn000z200i_20101117.gpcfgrid_lowth/flugg_mn000z200i_20101117.gpcfgrid_lowth_00*.root"
+//
   virtual ~NuMIFlux();
 
   void CalculateFlux();
   TVector3 RandomInTPC();
   TVector3 FromDetToBeam(const TVector3& det);
   double estimate_pots(int highest_potnum);
-  int calcEnuWgt( FluxNtuple& decay, const TVector3& xyz, double& enu, double& wgt_xy);
+  int calcEnuWgt( FluxNtuple* decay, const TVector3& xyz, double& enu, double& wgt_xy);
 
 };
 
@@ -84,7 +88,7 @@ NuMIFlux::NuMIFlux(string pattern) {
 
   //Inizialise histos
   TString titleBase1 = "Neutrino Flux;";
-  TString titleBase2 = "Energy [GeV];";
+  TString titleBase2 = " Energy [GeV];";
   TString titleBase3 = " / cm^{2} / 6e20 POT";
   // numu
   numuFluxHisto = new TH1D("numuFluxHisto", (titleBase1 + "#nu_{#mu}" + titleBase2 +"#nu_{#mu}" + titleBase3),histNbins,histMin,histMax);

@@ -47,7 +47,7 @@ void NuMIFlux::CalculateFlux() {
 */
   //TTree * tree = new TTree();
 
-  FluxNtuple fluxNtuple(cflux);//  = new FluxNtuple(cflux);
+  fluxNtuple = new FluxNtuple(cflux);
 
   //***************************************
   //
@@ -56,8 +56,9 @@ void NuMIFlux::CalculateFlux() {
   //***************************************
 
   Long64_t nflux = cflux->GetEntries();
+  std::cout << "WARNING: Looping until entry 76500000. Go in NuMIFlux.cc and change it if you don't like it." << std::endl;
   std::cout << "Total number of entries: " << nflux << std::endl;
-  for (Long64_t i=0; i < nflux; ++i ) {
+  for (Long64_t i=0; i < nflux /*&& i < 76500000.*/; ++i ) {
 
     // Get entry i. fluxNtuple is now filled with entry i info.
     cflux->GetEntry(i);
@@ -88,10 +89,10 @@ void NuMIFlux::CalculateFlux() {
     if (debug) cout << "wgt_xy " << wgt_xy << endl;
 
     // Calculate the total weight
-    double weight = wgt_xy * fluxNtuple.Nimpwt * fDefaultWeightCorrection;
+    double weight = wgt_xy * fluxNtuple->Nimpwt * fDefaultWeightCorrection;
 
     // Fill the histograms
-    switch (fluxNtuple.Ntype) {
+    switch (fluxNtuple->Ntype) {
       case numu:
         numuFluxHisto->Fill(enu, weight);
         break;
@@ -107,8 +108,8 @@ void NuMIFlux::CalculateFlux() {
     }
 
     // POT stuff
-    if ( fluxNtuple.evtno > highest_evtno ) 
-      highest_evtno = fluxNtuple.evtno;
+    if ( fluxNtuple->evtno > highest_evtno ) 
+      highest_evtno = fluxNtuple->evtno;
 
   } // end of loop over the entries
 
@@ -257,7 +258,7 @@ double NuMIFlux::estimate_pots(int highest_potnum) {
   // so we should round way up, those generating flugg files
   // aren't going to quantize less than 1000
   // though 500 would probably be okay, 100 would not.
-  // also can't use _last_ potnum because muons decays don't
+  // also can't use _last_ potnum because muons decay->> don't
   // have theirs set
 
   // Marco: Trying with 10000
@@ -271,7 +272,7 @@ double NuMIFlux::estimate_pots(int highest_potnum) {
 
 
 //___________________________________________________________________________
-int NuMIFlux::calcEnuWgt( FluxNtuple& decay, const TVector3& xyz,
+int NuMIFlux::calcEnuWgt( FluxNtuple* decay, const TVector3& xyz,
                          double& enu, double& wgt_xy)
 {
 
@@ -295,15 +296,15 @@ int NuMIFlux::calcEnuWgt( FluxNtuple& decay, const TVector3& xyz,
     
     // Original function description:
     //   Real function for use with PAW Ntuple To transform from destination
-    //   detector geometry to the unit sphere moving with decaying hadron with
-    //   velocity v, BETA=v/c, etc..  For (pseudo)scalar hadrons the decays will
+    //   detector geometry to the unit sphere moving with decayng hadron with
+    //   velocity v, BETA=v/c, etc..  For (pseudo)scalar hadrons the decay will
     //   be isotropic in this  sphere so the fractional area (out of 4-pi) is the
-    //   fraction of decays that hit the target.  For a given target point and
+    //   fraction of decay that hit the target.  For a given target point and
     //   area, and given x-y components of decay transverse location and slope,
     //   and given decay distance from target ans given decay GAMMA and
     //   rest-frame neutrino energy, the lab energy at the target and the
     //   fractional solid angle in the rest-frame are determined.
-    //   For muon decays, correction for non-isotropic nature of decay is done.
+    //   For muon decay, correction for non-isotropic nature of decay is done.
     
     // Arguments:
     //    dk2nu    :: contains current decay information
@@ -383,13 +384,13 @@ int NuMIFlux::calcEnuWgt( FluxNtuple& decay, const TVector3& xyz,
     double parent_mass = kPIMASS;
     
     /*
-     if ( decay.ptype == kpdg_pionminus)  parent_mass = kPIMASS;
-     if ( decay.ptype == kpdg_kaonminus)  parent_mass = kKMASS;
-     if ( decay.ptype == kpdg_k0mix)      parent_mass = kK0MASS;
-     if ( decay.ptype == kpdg_muminus)    parent_mass = kMUMASS;
-     if ( decay.ptype == kpdg_omegaplus)  parent_mass = kOMEGAMASS;
+     if ( decay->ptype == kpdg_pionminus)  parent_mass = kPIMASS;
+     if ( decay->ptype == kpdg_kaonminus)  parent_mass = kKMASS;
+     if ( decay->ptype == kpdg_k0mix)      parent_mass = kK0MASS;
+     if ( decay->ptype == kpdg_muminus)    parent_mass = kMUMASS;
+     if ( decay->ptype == kpdg_omegaplus)  parent_mass = kOMEGAMASS;
      */
-    switch ( decay.ptype ) {
+    switch ( decay->ptype ) {
         case kpdg_pionplus:
         case kpdg_pionminus:
             parent_mass = kPIMASS;
@@ -412,7 +413,7 @@ int NuMIFlux::calcEnuWgt( FluxNtuple& decay, const TVector3& xyz,
             parent_mass = kOMEGAMASS;
             break;
         default:
-            std::cerr << "bsim::calcEnuWgt unknown particle type " << decay.ptype
+            std::cerr << "bsim::calcEnuWgt unknown particle type " << decay->ptype
             << std::endl << std::flush;
             assert(0);
             return 1;
@@ -421,9 +422,9 @@ int NuMIFlux::calcEnuWgt( FluxNtuple& decay, const TVector3& xyz,
     
     
     
-    double parentp2 = ( decay.pdPx*decay.pdPx +
-                       decay.pdPy*decay.pdPy +
-                       decay.pdPz*decay.pdPz );
+    double parentp2 = ( decay->pdPx*decay->pdPx +
+                       decay->pdPy*decay->pdPy +
+                       decay->pdPz*decay->pdPz );
     double parent_energy = TMath::Sqrt( parentp2 +
                                        parent_mass*parent_mass);
     double parentp = TMath::Sqrt( parentp2 );
@@ -433,20 +434,20 @@ int NuMIFlux::calcEnuWgt( FluxNtuple& decay, const TVector3& xyz,
     double beta_mag  = TMath::Sqrt( ( gamma_sqr - 1.0 )/gamma_sqr );
     
     // Get the neutrino energy in the parent decay CM
-    double enuzr = decay.Necm;
+    double enuzr = decay->Necm;
     // Get angle from parent line of flight to chosen point in beam frame
-    double rad = TMath::Sqrt( (xpos-decay.Vx)*(xpos-decay.Vx) +
-                             (ypos-decay.Vy)*(ypos-decay.Vy) +
-                             (zpos-decay.Vz)*(zpos-decay.Vz) );
+    double rad = TMath::Sqrt( (xpos-decay->Vx)*(xpos-decay->Vx) +
+                             (ypos-decay->Vy)*(ypos-decay->Vy) +
+                             (zpos-decay->Vz)*(zpos-decay->Vz) );
     
     double emrat = 1.0;
     double costh_pardet = -999., theta_pardet = -999.;
     
     // boost correction, but only if parent hasn't stopped
     if ( parentp > 0. ) {
-        costh_pardet = ( decay.pdPx*(xpos-decay.Vx) +
-                        decay.pdPy*(ypos-decay.Vy) +
-                        decay.pdPz*(zpos-decay.Vz) )
+        costh_pardet = ( decay->pdPx*(xpos-decay->Vx) +
+                        decay->pdPy*(ypos-decay->Vy) +
+                        decay->pdPz*(zpos-decay->Vz) )
         / ( parentp * rad);
         if ( costh_pardet >  1.0 ) costh_pardet =  1.0;
         if ( costh_pardet < -1.0 ) costh_pardet = -1.0;
@@ -464,10 +465,10 @@ int NuMIFlux::calcEnuWgt( FluxNtuple& decay, const TVector3& xyz,
     // Get solid angle/4pi for detector element
     // small angle approximation, fixed by Alex Radovic
     //SAA//  double sangdet = ( kRDET*kRDET /
-    //SAA//                   ( (zpos-decay.Vz)*(zpos-decay.Vz) ) ) / 4.0;
-    double sanddetcomp = TMath::Sqrt( ( (xpos-decay.Vx)*(xpos-decay.Vx) ) +
-                                     ( (ypos-decay.Vy)*(ypos-decay.Vy) ) +
-                                     ( (zpos-decay.Vz)*(zpos-decay.Vz) )   );
+    //SAA//                   ( (zpos-decay->Vz)*(zpos-decay->Vz) ) ) / 4.0;
+    double sanddetcomp = TMath::Sqrt( ( (xpos-decay->Vx)*(xpos-decay->Vx) ) +
+                                     ( (ypos-decay->Vy)*(ypos-decay->Vy) ) +
+                                     ( (zpos-decay->Vz)*(zpos-decay->Vz) )   );
     double sangdet = (1.0-TMath::Cos(TMath::ATan( kRDET / sanddetcomp )))/2.0;
     
     // Weight for solid angle and lorentz boost
@@ -476,16 +477,16 @@ int NuMIFlux::calcEnuWgt( FluxNtuple& decay, const TVector3& xyz,
     // Done for all except polarized muon decay
     // in which case need to modify weight
     // (must be done in double precision)
-    if ( decay.ptype == kpdg_muplus || decay.ptype == kpdg_muminus) {
+    if ( decay->ptype == kpdg_muplus || decay->ptype == kpdg_muminus) {
         double beta[3], p_dcm_nu[4], p_nu[3], p_pcm_mp[3], partial;
         
         // Boost neu neutrino to mu decay CM
-        beta[0] = decay.pdPx / parent_energy;
-        beta[1] = decay.pdPy / parent_energy;
-        beta[2] = decay.pdPz / parent_energy;
-        p_nu[0] = (xpos-decay.Vx)*enu/rad;
-        p_nu[1] = (ypos-decay.Vy)*enu/rad;
-        p_nu[2] = (zpos-decay.Vz)*enu/rad;
+        beta[0] = decay->pdPx / parent_energy;
+        beta[1] = decay->pdPy / parent_energy;
+        beta[2] = decay->pdPz / parent_energy;
+        p_nu[0] = (xpos-decay->Vx)*enu/rad;
+        p_nu[1] = (ypos-decay->Vy)*enu/rad;
+        p_nu[2] = (zpos-decay->Vz)*enu/rad;
         partial = gamma *
         (beta[0]*p_nu[0] + beta[1]*p_nu[1] + beta[2]*p_nu[2] );
         partial = enu - partial/(gamma+1.0);
@@ -504,18 +505,18 @@ int NuMIFlux::calcEnuWgt( FluxNtuple& decay, const TVector3& xyz,
         
         
         // Boost parent of mu to mu production CM
-        double particle_energy = decay.ppenergy;
+        double particle_energy = decay->ppenergy;
         gamma = particle_energy/parent_mass;
-        beta[0] = decay.ppdxdz * decay.pppz / particle_energy;
-        beta[1] = decay.ppdydz * decay.pppz / particle_energy;
-        beta[2] =                    decay.pppz / particle_energy;
-        partial = gamma * ( beta[0]*decay.muparpx +
-                           beta[1]*decay.muparpy +
-                           beta[2]*decay.muparpz );
-        partial = decay.mupare - partial/(gamma+1.0);
-        p_pcm_mp[0] = decay.muparpx - beta[0]*gamma*partial;
-        p_pcm_mp[1] = decay.muparpy - beta[1]*gamma*partial;
-        p_pcm_mp[2] = decay.muparpz - beta[2]*gamma*partial;
+        beta[0] = decay->ppdxdz * decay->pppz / particle_energy;
+        beta[1] = decay->ppdydz * decay->pppz / particle_energy;
+        beta[2] =                    decay->pppz / particle_energy;
+        partial = gamma * ( beta[0]*decay->muparpx +
+                           beta[1]*decay->muparpy +
+                           beta[2]*decay->muparpz );
+        partial = decay->mupare - partial/(gamma+1.0);
+        p_pcm_mp[0] = decay->muparpx - beta[0]*gamma*partial;
+        p_pcm_mp[1] = decay->muparpy - beta[1]*gamma*partial;
+        p_pcm_mp[2] = decay->muparpz - beta[2]*gamma*partial;
         double p_pcm = TMath::Sqrt ( p_pcm_mp[0]*p_pcm_mp[0] +
                                     p_pcm_mp[1]*p_pcm_mp[1] +
                                     p_pcm_mp[2]*p_pcm_mp[2] );
@@ -534,13 +535,13 @@ int NuMIFlux::calcEnuWgt( FluxNtuple& decay, const TVector3& xyz,
         // Calc relative weight due to angle difference
         double wgt_ratio = 0.0;
         /*
-         if (decay.Ntype == kpdg_nuebar) wgt_ratio = 1.0 - costh;
-         if (decay.Ntype == kpdg_numubar) {
+         if (decay->Ntype == kpdg_nuebar) wgt_ratio = 1.0 - costh;
+         if (decay->Ntype == kpdg_numubar) {
          double xnu = 2.0 * enuzr / kMUMASS;
          wgt_ratio = ( (3.0-2.0*xnu )  - (1.0-2.0*xnu)*costh ) / (3.0-2.0*xnu);
          }
          */  
-        switch ( decay.Ntype ) {
+        switch ( decay->Ntype ) {
             case kpdg_nue:
             case kpdg_nuebar:
                 wgt_ratio = 1.0 - costh;

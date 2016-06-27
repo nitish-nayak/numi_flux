@@ -62,16 +62,25 @@
 ./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/TMatrixFUtils.h
 ./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/TMatrixFUtilsfwd.h
 ./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/TMath.h
-./NuMIFlux_cc.so: NuMIFlux.hh FluxNtuple.h
-./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/TROOT.h
+./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/TH1.h
+./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/TAxis.h
+./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/TAttAxis.h
+./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/TArrayC.h
+./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/TArrayS.h
+./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/TArrayF.h
+./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/Foption.h
+./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/TFitResultPtr.h
+./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/TFile.h
+./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/TDirectoryFile.h
 ./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/TDirectory.h
 ./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/TList.h
 ./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/TDatime.h
 ./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/TUUID.h
-./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/TFile.h
-./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/TDirectoryFile.h
 ./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/TMap.h
 ./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/THashTable.h
 ./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/TUrl.h
+./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/TGraph.h
+./NuMIFlux_cc.so: NuMIFlux.hh FluggNtuple/FluxNtuple.h
+./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/TROOT.h
 ./NuMIFlux_cc.so: /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/cintdictversion.h /nusoft/app/externals/root/v5_34_18a/Linux64bit+2.6-2.12-nu-e5-debug/include/RVersion.h
 NuMIFlux_cc__ROOTBUILDVERSION= 5.34/18
