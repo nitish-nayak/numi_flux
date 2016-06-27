@@ -10,7 +10,7 @@ source SetupNuMIFlux.sh
 root -l
 > gSystem->Load("FluggNtuple/FluxNtuple_C.so");
 > gSystem->Load("NuMIFlux_cc.so");
-> NuMIFlux f;
+> NuMIFlux f("generic_*_to_flugg.root");
 > f.CalculateFlux();
 ```
 
