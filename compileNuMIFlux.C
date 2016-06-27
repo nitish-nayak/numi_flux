@@ -1,6 +1,7 @@
 void compileNuMIFlux(){
 
   gSystem->Load("FluggNtuple/FluxNtuple_C.so");
-  .L NuMIFlux.cc+
+  TString t = ".L NuMIFlux.cc+;";
+  gROOT->ProcessLine(t);
 
 }
