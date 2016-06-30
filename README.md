@@ -1,5 +1,6 @@
 # NuMIFlux
-Code to calculate the NuMI Flux at MicroBooNE
+Code to calculate the NuMI Flux at MicroBooNE.
+
 Wiki page: https://cdcvs.fnal.gov/redmine/projects/ubooneoffline/wiki/NuMI_Flux_Histograms.
 
 
