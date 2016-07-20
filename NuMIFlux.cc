@@ -25,27 +25,6 @@ using namespace std;
 
 
 void NuMIFlux::CalculateFlux() {
-//void NuMIFlux(string pattern="/uboone/data/flux/numi/current/flugg_mn000z200i_20101117.gpcfgrid_lowth/flugg_mn000z200i_20101117.gpcfgrid_lowth_001.root"){
-
-/*
-  //const char* path = gSystem->ExpandPathName("$(DK2NU)");
-  const char* path = "/uboone/app/users/mdeltutt/NuMIFlux";
-  if ( path ) {
-    TString libs = gSystem->GetDynamicPath();
-    libs += ":";
-    libs += path;
-    //libs += "/lib";
-    gSystem->SetDynamicPath(libs.Data());	
-    gSystem->Load("FluxNtuple_C.so");
-  }
-*/
-/*
-  const int numu  = 56;
-  const int anumu = 55;
-  const int nue   = 53;
-  const int anue  = 52;
-*/
-  //TTree * tree = new TTree();
 
   fluxNtuple = new FluxNtuple(cflux);
 
@@ -56,9 +35,8 @@ void NuMIFlux::CalculateFlux() {
   //***************************************
 
   Long64_t nflux = cflux->GetEntries();
-  std::cout << "WARNING: Looping until entry 76500000. Go in NuMIFlux.cc and change it if you don't like it." << std::endl;
   std::cout << "Total number of entries: " << nflux << std::endl;
-  for (Long64_t i=0; i < nflux /*&& i < 76500000.*/; ++i ) {
+  for (Long64_t i=0; i < nflux; ++i ) {
 
     // Get entry i. fluxNtuple is now filled with entry i info.
     cflux->GetEntry(i);
@@ -120,13 +98,12 @@ void NuMIFlux::CalculateFlux() {
   //
   //***************************************
 
-  //double AccumulatedPOT = estimate_pots(highest_evtno) * Nfiles;
   AccumulatedPOT += estimate_pots(highest_evtno); // To account for last tree
   double scale = NominalPOT/AccumulatedPOT;
-  numuFluxHisto->Scale(scale);
-  anumuFluxHisto->Scale(scale);
-  nueFluxHisto->Scale(scale);
-  anueFluxHisto->Scale(scale);
+  numuFluxHisto  -> Scale(scale);
+  anumuFluxHisto -> Scale(scale);
+  nueFluxHisto   -> Scale(scale);
+  anueFluxHisto  -> Scale(scale);
   cout << endl << ">>> TOTAL POT: " << AccumulatedPOT << endl << endl;
 
 
@@ -163,7 +140,7 @@ void NuMIFlux::CalculateFlux() {
       value = numuFluxHisto->GetBinContent(i);
       value *= genieXsecNumuCC->Eval(numuFluxHisto->GetBinCenter(i)); // Eval implies linear interpolation
       value *= (1e-38 * Ntarget/40.); // 1/40 is due to I'm considering nu_mu_Ar40.
-      nuCCHisto->SetBinContent(i,value);
+      numuCCHisto->SetBinContent(i,value);
     }
   } // end if ( genieXsecPath )
 
@@ -177,13 +154,13 @@ void NuMIFlux::CalculateFlux() {
   //***************************************
 
   f->cd();
-  numuFluxHisto->Write();
-  anumuFluxHisto->Write();
-  nueFluxHisto->Write();
-  anueFluxHisto->Write();
+  numuFluxHisto  -> Write();
+  anumuFluxHisto -> Write();
+  nueFluxHisto   -> Write();
+  anueFluxHisto  -> Write();
   if ( genieXsecPath ) {
-    nuCCHisto->Write();
-    genieXsecNumuCC->Write();
+    numuCCHisto     -> Write();
+    genieXsecNumuCC -> Write();
   }
   f->Close();
 

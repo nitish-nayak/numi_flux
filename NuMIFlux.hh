@@ -46,7 +46,7 @@ public :
   TH1D* anumuFluxHisto;
   TH1D* nueFluxHisto;
   TH1D* anueFluxHisto;
-  TH1D* nuCCHisto;
+  TH1D* numuCCHisto;
   TGraph *genieXsecNumuCC;
   TFile* f = new TFile("NuMIFlux.root", "RECREATE");
 
@@ -98,7 +98,7 @@ NuMIFlux::NuMIFlux(string pattern) {
   nueFluxHisto = new TH1D("nueFluxHisto", (titleBase1 + "#nu_{e}" + titleBase2 +"#nu_{e}" + titleBase3),histNbins,histMin,histMax);
   // anue
   anueFluxHisto = new TH1D("anueFluxHisto", (titleBase1 + "#bar{#nu}_{e}" + titleBase2 + "#bar{#nu}_{e}" + titleBase3),histNbins,histMin,histMax);
-  nuCCHisto = new TH1D("nuCCHisto", "numu CC; #nu_{#mu} Energy [GeV]; #nu_{#mu} CC / 79 ton / 6e20 POT",histNbins,histMin,histMax);
+  numuCCHisto = new TH1D("numuCCHisto", "numu CC; #nu_{#mu} Energy [GeV]; #nu_{#mu} CC / 79 ton / 6e20 POT",histNbins,histMin,histMax);
 }
 
 NuMIFlux::~NuMIFlux() {
