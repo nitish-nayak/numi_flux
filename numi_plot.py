@@ -19,8 +19,8 @@ ROOT.gROOT.SetMacroPath('~/');
 ROOT.gROOT.Macro( os.path.expanduser( 'rootlogon.C' ) )
 
 # Opening root file
-f = TFile("Desktop/NuMIFlux.root")
-#f = TFile("Desktop/NuMIFlux_anti.root")
+#f = TFile("files/NuMIFlux.root")
+f = TFile("files/NuMIFlux_anti.root")
 f.ls()
 
 h_numu = f.Get("numuFluxHisto")
@@ -69,14 +69,14 @@ leg.Draw();
 #t.SetTextAlign(32);
 #t.Draw();
 
-t2 = TLatex(.51, .48, "#splitline{Off-axis at MicroBooNE}{NuMI Flux}");
+t2 = TLatex(.51, .48, "#splitline{Off-axis NuMI Flux}{at MicroBooNE}");
 t2.SetTextColor(ROOT.kRed+2);
 t2.SetNDC();
 t2.SetTextSize(1.4/30.);
 t2.SetTextAlign(11);
 t2.Draw();
 
-t3 = TLatex(.51, .40, "Neutrino Mode");
+t3 = TLatex(.51, .40, "Anti-Neutrino Mode");
 t3.SetTextColor(ROOT.kBlack);
 t3.SetNDC();
 t3.SetTextSize(1.4/30.);
