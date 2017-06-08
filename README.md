@@ -4,6 +4,28 @@ Code to calculate the NuMI Flux at MicroBooNE.
 Wiki page: https://cdcvs.fnal.gov/redmine/projects/ubooneoffline/wiki/NuMI_Flux_Histograms.
 
 
+## First Usage
+
+```
+git clone git@github.com:marcodeltutto/NuMIFlux.git
+cd NuMIFlux/
+source SetupNuMIFlux.sh
+
+cd FluggNtuple/
+root -l 
+> .L FluxNtuple.C+
+> .q
+
+cd ../
+root -l
+> gSystem->Load("FluggNtuple/FluxNtuple_C.so");
+> .L NuMIFlux.cc+
+> .q
+
+```
+
+## General Instructions
+
 Run with:
 
 ```
