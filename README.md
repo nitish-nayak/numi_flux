@@ -6,6 +6,8 @@ Wiki page: https://cdcvs.fnal.gov/redmine/projects/ubooneoffline/wiki/NuMI_Flux_
 
 ## First Usage
 
+From the MicroBooNE gpvm machines:
+
 ```
 git clone git@github.com:marcodeltutto/NuMIFlux.git
 cd NuMIFlux/
