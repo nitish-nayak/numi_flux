@@ -193,29 +193,40 @@ TVector3 NuMIFlux::FromDetToBeam( const TVector3& det ) {
     
     TVector3 beam;
     TRotation R;
+    //corrected rotation matrix using the 0,0,0 position for MicroBooNE
+    //Previous matrix is calculated relative to MiniBooNE, which is not in the centre of the BNB!
+
+    TVector3 newX(0.92103853804025682, 0.0000462540012621546684, -0.38947144863934974);
+    TVector3 newY(0.0227135048039241207, 0.99829162468141475, 0.0538324139386641073);
+    TVector3 newZ(0.38880857519374290, -0.0584279894529063024, 0.91946400794392302);
+    //old matrix
+    /*
     TVector3 newX(0.921228671,   0.00136256111, -0.389019125);
     TVector3 newY(0.0226872648,  0.998103714,    0.0572211871);
     TVector3 newZ(0.388359401,  -0.061539578,    0.919450845);
-    
+    */
+
     R.RotateAxes(newX,newY,newZ);
     if (debug) {
-        cout << "R_{beam to det} = " << endl;
-        cout << " [ " << R.XX() << " " << R.XY() << " " << R.XZ() << " ] " << endl;
-        cout << " [ " << R.YX() << " " << R.YY() << " " << R.YZ() << " ] " << endl;
-        cout << " [ " << R.ZX() << " " << R.ZY() << " " << R.ZZ() << " ] " << endl;
-        cout << endl;
+            cout << "R_{beam to det} = " << endl;
+            cout << " [ " << R.XX() << " " << R.XY() << " " << R.XZ() << " ] " << endl;
+            cout << " [ " << R.YX() << " " << R.YY() << " " << R.YZ() << " ] " << endl;
+            cout << " [ " << R.ZX() << " " << R.ZY() << " " << R.ZZ() << " ] " << endl;
+            cout << endl;
     }
     R.Invert(); // R is now the inverse
     if (debug) {
-        cout << "R_{det to beam} = " << endl;
-        cout << " [ " << R.XX() << " " << R.XY() << " " << R.XZ() << " ] " << endl;
-        cout << " [ " << R.YX() << " " << R.YY() << " " << R.YZ() << " ] " << endl;
-        cout << " [ " << R.ZX() << " " << R.ZY() << " " << R.ZZ() << " ] " << endl;
-        cout << endl;
+            cout << "R_{det to beam} = " << endl;
+            cout << " [ " << R.XX() << " " << R.XY() << " " << R.XZ() << " ] " << endl;
+            cout << " [ " << R.YX() << " " << R.YY() << " " << R.YZ() << " ] " << endl;
+            cout << " [ " << R.ZX() << " " << R.ZY() << " " << R.ZZ() << " ] " << endl;
+            cout << endl;
     }
     // Now R allows to go from detector to beam coordinates.
     // NuMIDet is vector from NuMI target to uB detector (in beam coordinates)
-    TVector3 NuMIDet (54.499, 74.461,  677.611); // m
+    // Updated position - leaving old positions here (July 2018)
+    //TVector3 NuMIDet (54.499, 74.461,  677.611); // m
+    TVector3 NuMIDet (55.02, 72.59,  672.70); //m
     NuMIDet *= 100.; // To have NuMIDet in cm
     
     beam = R * det + NuMIDet;
