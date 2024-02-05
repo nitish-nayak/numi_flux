@@ -1,9 +1,12 @@
 #!/usr/bin/env python
-#
 
 import os,sys,string, time
 import ROOT
+
+ROOT.gROOT.ProcessLine(".L NuMIFlux.cc+")
 ROOT.gSystem.Load("NuMIFlux_cc.so")
+ROOT.gROOT.SetBatch(True)
+
 from ROOT import NuMIFlux
 from glob import glob
 
@@ -11,6 +14,3 @@ from glob import glob
 
 f = NuMIFlux()
 f.CalculateFlux()
-
-
-raw_input("Please press enter to exit.")

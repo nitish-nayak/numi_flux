@@ -49,14 +49,14 @@ public :
   TH1D* nueFluxHisto;
   TH1D* anueFluxHisto;
   TH1D* numuCCHisto;
+  TH1D* hPOT;
+  TTree* outTree;
   // TGraph *genieXsecNumuCC;
+
   TFile* f = new TFile("NuMIFlux.root", "RECREATE");
 
 
-  NuMIFlux(string pattern="/uboone/data/users/bnayak/ppfx/flugg_studies/flugg_files/rhc/*_70*.root");
-  // NuMIFlux(string pattern="/nusoft/data/flux/blackbird-numix/flugg_mn000z-200i_rp11_lowth_pnut_f11f093bbird_target/root/flugg_mn000z-200i_rp11_bs1.1_pnut_lowth_f11f093bbird_target_7*root");
-//"/uboone/data/flux/numi/current/flugg_mn000z200i_20101117.gpcfgrid_lowth/flugg_mn000z200i_20101117.gpcfgrid_lowth_00*.root"
-//
+  NuMIFlux(string pattern="/uboone/data/users/bnayak/ppfx/flugg_studies/flugg_files/rhc/*_7000.root");
   virtual ~NuMIFlux();
 
   void CalculateFlux();
@@ -64,6 +64,16 @@ public :
   TVector3 FromDetToBeam(const TVector3& det);
   double estimate_pots(int highest_potnum);
   int calcEnuWgt( FluxNtuple* decay, const TVector3& xyz, double& enu, double& wgt_xy);
+
+private:
+
+  Float_t nuE;
+  Float_t wgt;
+  Int_t ptype;
+  Int_t ncascade;
+  Int_t ntype;
+  Int_t pmedium;
+  Int_t decaytype;
 
 };
 

@@ -27,12 +27,10 @@ using namespace std;
 NuMIFlux::NuMIFlux(string pattern) {
 
   const char* path = "/uboone/app/users/bnayak/flugg_reweight/flugg_pointing/NuMIFlux/FluggNtuple";
-  // const char* path = "";
   if ( path ) {
     TString libs = gSystem->GetDynamicPath();
     libs += ":";
     libs += path;
-    //libs += "/lib";
     gSystem->SetDynamicPath(libs.Data());
     gSystem->Load("FluxNtuple_C.so");
   }
@@ -56,6 +54,16 @@ NuMIFlux::NuMIFlux(string pattern) {
   // anue
   anueFluxHisto = new TH1D("anueFluxHisto", (titleBase1 + "#bar{#nu}_{e}" + titleBase2 + "#bar{#nu}_{e}" + titleBase3),histNbins,histMin,histMax);
   numuCCHisto = new TH1D("numuCCHisto", "numu CC; #nu_{#mu} Energy [GeV]; #nu_{#mu} CC / 79 ton / 6e20 POT",histNbins,histMin,histMax);
+  hPOT = new TH1D("POT", "Total POT", 1, 0, 1);
+
+  outTree = new TTree("outTree", "outTree");
+  outTree->Branch("nuE", &nuE, "nuE/F");
+  outTree->Branch("wgt", &wgt, "wgt/F");
+  outTree->Branch("ptype", &ptype, "ptype/I");
+  outTree->Branch("ntype", &ntype, "ntype/I");
+  outTree->Branch("ncascade", &ncascade, "ncascade/I");
+  outTree->Branch("pmedium", &pmedium, "pmedium/I");
+  outTree->Branch("decaytype", &decaytype, "decaytype/I");
 }
 
 NuMIFlux::~NuMIFlux() {
@@ -111,21 +119,34 @@ void NuMIFlux::CalculateFlux() {
     switch (fluxNtuple->Ntype) {
       case numu:
         numuFluxHisto->Fill(enu, weight);
+        ntype = 14;
         break;
       case anumu:
         anumuFluxHisto->Fill(enu, weight);
+        ntype = -14;
         break;
       case nue:
         nueFluxHisto->Fill(enu, weight);
+        ntype = 12;
         break;
       case anue:
         anueFluxHisto->Fill(enu, weight);
+        ntype = -12;
         break;
     }
 
     // POT stuff
     if ( fluxNtuple->evtno > highest_evtno )
       highest_evtno = fluxNtuple->evtno;
+
+    nuE = enu;
+    wgt = weight;
+    ptype = fluxNtuple->ptype;
+    ncascade = fluxNtuple->tgen;
+    pmedium = fluxNtuple->ppmedium;
+    decaytype = fluxNtuple->Ndecay;
+
+    outTree->Fill();
 
   } // end of loop over the entries
 
@@ -137,6 +158,8 @@ void NuMIFlux::CalculateFlux() {
   //***************************************
 
   AccumulatedPOT += estimate_pots(highest_evtno); // To account for last tree
+  hPOT->SetBinContent(1, AccumulatedPOT);
+
   double scale = NominalPOT/AccumulatedPOT;
   numuFluxHisto  -> Scale(scale);
   anumuFluxHisto -> Scale(scale);
@@ -182,9 +205,6 @@ void NuMIFlux::CalculateFlux() {
   //   }
   // } // end if ( genieXsecPath )
 
-
-
-
   //***************************************
   //
   // Writing on file
@@ -196,6 +216,9 @@ void NuMIFlux::CalculateFlux() {
   anumuFluxHisto -> Write();
   nueFluxHisto   -> Write();
   anueFluxHisto  -> Write();
+
+  hPOT->Write();
+  outTree->Write();
   // if ( genieXsecPath ) {
   //   numuCCHisto     -> Write();
   //   genieXsecNumuCC -> Write();
