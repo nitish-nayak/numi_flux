@@ -1,16 +1,15 @@
-#!/usr/bin/env python
-
-import os,sys,string, time
+import os,sys,string,time
+import re
 import ROOT
 
-ROOT.gROOT.ProcessLine(".L NuMIFlux.cc+")
+recompile = eval(sys.argv[1])
+
+if recompile:
+    ROOT.gROOT.ProcessLine(".L NuMIFlux.cc+")
 ROOT.gSystem.Load("NuMIFlux_cc.so")
 ROOT.gROOT.SetBatch(True)
 
 from ROOT import NuMIFlux
-from glob import glob
 
-#  fname = glob("/uboone/data/flux/numi/current/flugg_mn000z200i_20101117.gpcfgrid_lowth/flugg_mn000z200i_20101117.gpcfgrid_lowth_00*.root")
-
-f = NuMIFlux()
+f = NuMIFlux("/uboone/data/users/bnayak/ppfx/flugg_studies/flugg_files/rhc/flugg*_700*.root")
 f.CalculateFlux()
