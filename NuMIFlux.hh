@@ -1,6 +1,8 @@
 #ifndef NuMIFlux_h
 #define NuMIFlux_h
 
+#pragma once
+
 #include <iostream>
 #include <iomanip>
 #include <string>
@@ -47,11 +49,12 @@ public :
   TH1D* nueFluxHisto;
   TH1D* anueFluxHisto;
   TH1D* numuCCHisto;
-  TGraph *genieXsecNumuCC;
+  // TGraph *genieXsecNumuCC;
   TFile* f = new TFile("NuMIFlux.root", "RECREATE");
 
 
-  NuMIFlux(string pattern="/uboone/data/flux/numi/v2/flugg_mn000z200i_rp11_lowth_pnut_f112c0f093bbird/flugg_mn000z200i_rp11_bs1.1_pnut_lowth_f112c0f093bbird_0*.root");
+  NuMIFlux(string pattern="/uboone/data/users/bnayak/ppfx/flugg_studies/flugg_files/rhc/*_70*.root");
+  // NuMIFlux(string pattern="/nusoft/data/flux/blackbird-numix/flugg_mn000z-200i_rp11_lowth_pnut_f11f093bbird_target/root/flugg_mn000z-200i_rp11_bs1.1_pnut_lowth_f11f093bbird_target_7*root");
 //"/uboone/data/flux/numi/current/flugg_mn000z200i_20101117.gpcfgrid_lowth/flugg_mn000z200i_20101117.gpcfgrid_lowth_00*.root"
 //
   virtual ~NuMIFlux();
@@ -65,44 +68,3 @@ public :
 };
 
 #endif
-
-#ifdef NuMIFlux_cxx
-
-NuMIFlux::NuMIFlux(string pattern) {
-
-  const char* path = "/uboone/app/users/mdeltutt/NuMIFlux";
-  if ( path ) {
-    TString libs = gSystem->GetDynamicPath();
-    libs += ":";
-    libs += path;
-    //libs += "/lib";
-    gSystem->SetDynamicPath(libs.Data());       
-    gSystem->Load("FluxNtuple_C.so");
-  }
-
-  cflux = new TChain("h10");
-  cflux->Add(pattern.c_str());
-
-  Nfiles = cflux->GetNtrees();
-  cout << "Number of files: " << Nfiles << endl;
-
-  //Inizialise histos
-  TString titleBase1 = "Neutrino Flux;";
-  TString titleBase2 = " Energy [GeV];";
-  TString titleBase3 = " / cm^{2} / 6e20 POT";
-  // numu
-  numuFluxHisto = new TH1D("numuFluxHisto", (titleBase1 + "#nu_{#mu}" + titleBase2 +"#nu_{#mu}" + titleBase3),histNbins,histMin,histMax);
-  // anumu
-  anumuFluxHisto = new TH1D("anumuFluxHisto", (titleBase1 + "#bar{#nu}_{#mu}" + titleBase2 +"#bar{#nu}_{#mu}" + titleBase3),histNbins,histMin,histMax);
-  // nue
-  nueFluxHisto = new TH1D("nueFluxHisto", (titleBase1 + "#nu_{e}" + titleBase2 +"#nu_{e}" + titleBase3),histNbins,histMin,histMax);
-  // anue
-  anueFluxHisto = new TH1D("anueFluxHisto", (titleBase1 + "#bar{#nu}_{e}" + titleBase2 + "#bar{#nu}_{e}" + titleBase3),histNbins,histMin,histMax);
-  numuCCHisto = new TH1D("numuCCHisto", "numu CC; #nu_{#mu} Energy [GeV]; #nu_{#mu} CC / 79 ton / 6e20 POT",histNbins,histMin,histMax);
-}
-
-NuMIFlux::~NuMIFlux() {
-
-}
-
-#endif // #ifdef NuMIFlux_cxx

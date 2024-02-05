@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Sun Jun 26 06:19:35 2016 by ROOT version 5.34/18
+// Sun Feb  4 18:53:57 2024 by ROOT version 6.12/06
 // from TTree h10/neutrino
-// found on file: /uboone/data/flux/numi/v2/flugg_mn000z200i_rp11_lowth_pnut_f112c0f093bbird/flugg_mn000z200i_rp11_bs1.1_pnut_lowth_f112c0f093bbird_0000.root
+// found on file: /uboone/data/users/bnayak/ppfx/flugg_studies/flugg_files/rhc/flugg_mn000z-200i_rp11_bs1.1_pnut_lowth_f11f093bbird_target_7000.root
 //////////////////////////////////////////////////////////
 
 #ifndef FluxNtuple_h
@@ -14,12 +14,12 @@
 
 // Header file for the classes stored in the TTree if any.
 
-// Fixed size dimensions of array or collections stored in the TTree if any.
-
 class FluxNtuple {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
+
+// Fixed size dimensions of array or collections stored in the TTree if any.
 
    // Declaration of leaf types
    Int_t           run;
@@ -190,9 +190,9 @@ FluxNtuple::FluxNtuple(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/uboone/data/flux/numi/v2/flugg_mn000z200i_rp11_lowth_pnut_f112c0f093bbird/flugg_mn000z200i_rp11_bs1.1_pnut_lowth_f112c0f093bbird_0000.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/uboone/data/users/bnayak/ppfx/flugg_studies/flugg_files/rhc/flugg_mn000z-200i_rp11_bs1.1_pnut_lowth_f11f093bbird_target_7000.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("/uboone/data/flux/numi/v2/flugg_mn000z200i_rp11_lowth_pnut_f112c0f093bbird/flugg_mn000z200i_rp11_bs1.1_pnut_lowth_f112c0f093bbird_0000.root");
+         f = new TFile("/uboone/data/users/bnayak/ppfx/flugg_studies/flugg_files/rhc/flugg_mn000z-200i_rp11_bs1.1_pnut_lowth_f11f093bbird_target_7000.root");
       }
       f->GetObject("h10",tree);
 

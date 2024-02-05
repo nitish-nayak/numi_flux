@@ -1,10 +1,13 @@
 #define NuMIFlux_cxx
-#include <iostream>	
+
+#pragma once
+
+#include <iostream>
 #include <iomanip>
 #include <string>
-	
+
 using namespace std;
-	
+
 #include "TChain.h"
 #include "TSystem.h"
 #include "TRandom.h"
@@ -15,14 +18,49 @@ using namespace std;
 #include "TGraph.h"
 
 #include "NuMIFlux.hh"
-#include "FluggNtuple/FluxNtuple.h"
 
 //#include "dk2nu.h"
 //#include "dkmeta.h"
 //#include "calcLocationWeights.cxx"
 //#include "FluxNtuple_C.so"
-	
 
+NuMIFlux::NuMIFlux(string pattern) {
+
+  const char* path = "/uboone/app/users/bnayak/flugg_reweight/flugg_pointing/NuMIFlux/FluggNtuple";
+  // const char* path = "";
+  if ( path ) {
+    TString libs = gSystem->GetDynamicPath();
+    libs += ":";
+    libs += path;
+    //libs += "/lib";
+    gSystem->SetDynamicPath(libs.Data());
+    gSystem->Load("FluxNtuple_C.so");
+  }
+
+  cflux = new TChain("h10");
+  cflux->Add(pattern.c_str());
+
+  Nfiles = cflux->GetNtrees();
+  cout << "Number of files: " << Nfiles << endl;
+
+  //Inizialise histos
+  TString titleBase1 = "Neutrino Flux;";
+  TString titleBase2 = " Energy [GeV];";
+  TString titleBase3 = " / cm^{2} / 6e20 POT";
+  // numu
+  numuFluxHisto = new TH1D("numuFluxHisto", (titleBase1 + "#nu_{#mu}" + titleBase2 +"#nu_{#mu}" + titleBase3),histNbins,histMin,histMax);
+  // anumu
+  anumuFluxHisto = new TH1D("anumuFluxHisto", (titleBase1 + "#bar{#nu}_{#mu}" + titleBase2 +"#bar{#nu}_{#mu}" + titleBase3),histNbins,histMin,histMax);
+  // nue
+  nueFluxHisto = new TH1D("nueFluxHisto", (titleBase1 + "#nu_{e}" + titleBase2 +"#nu_{e}" + titleBase3),histNbins,histMin,histMax);
+  // anue
+  anueFluxHisto = new TH1D("anueFluxHisto", (titleBase1 + "#bar{#nu}_{e}" + titleBase2 + "#bar{#nu}_{e}" + titleBase3),histNbins,histMin,histMax);
+  numuCCHisto = new TH1D("numuCCHisto", "numu CC; #nu_{#mu} Energy [GeV]; #nu_{#mu} CC / 79 ton / 6e20 POT",histNbins,histMin,histMax);
+}
+
+NuMIFlux::~NuMIFlux() {
+
+}
 
 void NuMIFlux::CalculateFlux() {
 
@@ -45,7 +83,7 @@ void NuMIFlux::CalculateFlux() {
     if (i % 100000 == 0) cout << "On entry " << i << endl;
     if(treeNumber != cflux->GetTreeNumber()) {
       treeNumber = cflux->GetTreeNumber();
-      std::cout << "Moving to tree number " << treeNumber << "." << std::endl;	
+      std::cout << "Moving to tree number " << treeNumber << "." << std::endl;
       AccumulatedPOT += estimate_pots(highest_evtno);
       cout << "AccumulatedPOT: " << AccumulatedPOT << endl;
     }
@@ -59,10 +97,10 @@ void NuMIFlux::CalculateFlux() {
 
     // From detector to beam coordinates
     TVector3 xyz_beam = FromDetToBeam(xyz_det);
-    if (debug) cout << "xyz_beam = [" << xyz_beam.X() << ", " << xyz_beam.Y() << ", " << xyz_beam.Z() << "]" << endl;   
- 
+    if (debug) cout << "xyz_beam = [" << xyz_beam.X() << ", " << xyz_beam.Y() << ", " << xyz_beam.Z() << "]" << endl;
+
     // Calculate the weight
-    int ret = calcEnuWgt(fluxNtuple, xyz_beam, enu, wgt_xy);     
+    int ret = calcEnuWgt(fluxNtuple, xyz_beam, enu, wgt_xy);
     if (ret != 0) cout << "Error with calcEnuWgt. Return " << ret << endl;
     if (debug) cout << "wgt_xy " << wgt_xy << endl;
 
@@ -82,11 +120,11 @@ void NuMIFlux::CalculateFlux() {
         break;
       case anue:
         anueFluxHisto->Fill(enu, weight);
-        break; 
+        break;
     }
 
     // POT stuff
-    if ( fluxNtuple->evtno > highest_evtno ) 
+    if ( fluxNtuple->evtno > highest_evtno )
       highest_evtno = fluxNtuple->evtno;
 
   } // end of loop over the entries
@@ -119,30 +157,30 @@ void NuMIFlux::CalculateFlux() {
   //
   //***************************************
 
-  const char* genieXsecPath = gSystem->ExpandPathName("$(GENIEXSECPATH)");
-  if ( !genieXsecPath ) {
-    std::cout << "$(GENIEXSECPATH) not defined." << std::endl;
-    std::cout << "Please setup *genie_xsec*. (setup genie_xsec R-2_8_0   -q default)." << std::endl; 
-  }
-
-  if ( genieXsecPath ) {
-    TString genieXsecFileName = genieXsecPath;
-    genieXsecFileName += "/xsec_graphs.root";
-    TFile *genieXsecFile = new TFile(genieXsecFileName,"READ");
-    genieXsecFile->cd("nu_mu_Ar40");
-    genieXsecNumuCC = (TGraph *) gDirectory->Get("tot_cc");
-    genieXsecFile->Close();
-
-    // TSpline3* genieXsecSplineNumuCC = new TSpline3("genieXsecSplineNumuCC", genieXsecNumuCC, "", 0,6);
-
-    double value;
-    for(int i=1; i<histNbins+1; i++) {
-      value = numuFluxHisto->GetBinContent(i);
-      value *= genieXsecNumuCC->Eval(numuFluxHisto->GetBinCenter(i)); // Eval implies linear interpolation
-      value *= (1e-38 * Ntarget/40.); // 1/40 is due to I'm considering nu_mu_Ar40.
-      numuCCHisto->SetBinContent(i,value);
-    }
-  } // end if ( genieXsecPath )
+  // const char* genieXsecPath = gSystem->ExpandPathName("$(GENIEXSECPATH)");
+  // if ( !genieXsecPath ) {
+  //   std::cout << "$(GENIEXSECPATH) not defined." << std::endl;
+  //   std::cout << "Please setup *genie_xsec*. (setup genie_xsec R-2_8_0   -q default)." << std::endl;
+  // }
+  //
+  // if ( genieXsecPath ) {
+  //   TString genieXsecFileName = genieXsecPath;
+  //   genieXsecFileName += "/xsec_graphs.root";
+  //   TFile *genieXsecFile = new TFile(genieXsecFileName,"READ");
+  //   genieXsecFile->cd("nu_mu_Ar40");
+  //   genieXsecNumuCC = (TGraph *) gDirectory->Get("tot_cc");
+  //   genieXsecFile->Close();
+  //
+  //   // TSpline3* genieXsecSplineNumuCC = new TSpline3("genieXsecSplineNumuCC", genieXsecNumuCC, "", 0,6);
+  //
+  //   double value;
+  //   for(int i=1; i<histNbins+1; i++) {
+  //     value = numuFluxHisto->GetBinContent(i);
+  //     value *= genieXsecNumuCC->Eval(numuFluxHisto->GetBinCenter(i)); // Eval implies linear interpolation
+  //     value *= (1e-38 * Ntarget/40.); // 1/40 is due to I'm considering nu_mu_Ar40.
+  //     numuCCHisto->SetBinContent(i,value);
+  //   }
+  // } // end if ( genieXsecPath )
 
 
 
@@ -158,10 +196,10 @@ void NuMIFlux::CalculateFlux() {
   anumuFluxHisto -> Write();
   nueFluxHisto   -> Write();
   anueFluxHisto  -> Write();
-  if ( genieXsecPath ) {
-    numuCCHisto     -> Write();
-    genieXsecNumuCC -> Write();
-  }
+  // if ( genieXsecPath ) {
+  //   numuCCHisto     -> Write();
+  //   genieXsecNumuCC -> Write();
+  // }
   f->Close();
 
 }
@@ -169,28 +207,28 @@ void NuMIFlux::CalculateFlux() {
 
 //___________________________________________________________________________
 TVector3 NuMIFlux::RandomInTPC() {
-    
+
     TDatime *d = new TDatime;
     TRandom *r = new TRandom(d->GetTime());
-    
+
     double xTPC = 256.35;  // cm
     double yTPC = 233.;  // cm
     double zTPC = 1036.8; // cm
-    
+
     double x = r->Uniform(0., xTPC);
     double y = r->Uniform(-yTPC/2., yTPC/2.);
     double z = r->Uniform(0., zTPC);
-    
+
     TVector3 det;
     det.SetXYZ(x,y,z);
-    
+
     return det;
 }
 
 
 //___________________________________________________________________________
 TVector3 NuMIFlux::FromDetToBeam( const TVector3& det ) {
-    
+
     TVector3 beam;
     TRotation R;
     //corrected rotation matrix using the 0,0,0 position for MicroBooNE
@@ -228,9 +266,9 @@ TVector3 NuMIFlux::FromDetToBeam( const TVector3& det ) {
     //TVector3 NuMIDet (54.499, 74.461,  677.611); // m
     TVector3 NuMIDet (55.02, 72.59,  672.70); //m
     NuMIDet *= 100.; // To have NuMIDet in cm
-    
+
     beam = R * det + NuMIDet;
-    
+
     return beam;
 }
 
@@ -240,7 +278,7 @@ TVector3 NuMIFlux::FromDetToBeam( const TVector3& det ) {
 double NuMIFlux::estimate_pots(int highest_potnum) {
 
   // Stolen: https://cdcvs.fnal.gov/redmine/projects/dk2nu/repository/show/trunk/dk2nu
-  // looks like low counts are due to "evtno" not including                     
+  // looks like low counts are due to "evtno" not including
   // protons that miss the actual target (hit baffle, etc)
   // this will vary with beam conditions parameters
   // so we should round way up, those generating flugg files
@@ -250,7 +288,7 @@ double NuMIFlux::estimate_pots(int highest_potnum) {
   // have theirs set
 
   // Marco: Trying with 10000
-  const Int_t    nquant = 10000; //1000; // 500;  // 100                                 
+  const Int_t    nquant = 10000; //1000; // 500;  // 100
   const Double_t rquant = nquant;
 
   Int_t estimate = (TMath::FloorNint((highest_potnum-1)/rquant)+1)*nquant;
@@ -271,7 +309,7 @@ int NuMIFlux::calcEnuWgt( FluxNtuple* decay, const TVector3& xyz,
     //   Title:   Neutrino Beam Simulation using PAW with Weighted Monte Carlos
     //   Author:  Rick Milburn
     //   Date:    1995-10-01
-    
+
     // History:
     // jzh  3/21/96 grab R.H.Milburn's weighing routine
     // jzh  5/ 9/96 substantially modify the weighting function use dot product
@@ -281,7 +319,7 @@ int NuMIFlux::calcEnuWgt( FluxNtuple* decay, const TVector3& xyz,
     // jzh  4/17/97 convert more code to double precision because of problems
     //              with Enu>30 GeV
     // rwh 10/ 9/08 transliterate function from f77 to C++
-    
+
     // Original function description:
     //   Real function for use with PAW Ntuple To transform from destination
     //   detector geometry to the unit sphere moving with decayng hadron with
@@ -293,7 +331,7 @@ int NuMIFlux::calcEnuWgt( FluxNtuple* decay, const TVector3& xyz,
     //   rest-frame neutrino energy, the lab energy at the target and the
     //   fractional solid angle in the rest-frame are determined.
     //   For muon decay, correction for non-isotropic nature of decay is done.
-    
+
     // Arguments:
     //    dk2nu    :: contains current decay information
     //    xyz      :: 3-vector of position to evaluate
@@ -305,7 +343,7 @@ int NuMIFlux::calcEnuWgt( FluxNtuple* decay, const TVector3& xyz,
     // Assumptions:
     //    Energies given in GeV
     //    Particle codes have been translated from GEANT into PDG codes
-    
+
     // for now ... these masses _should_ come from TDatabasePDG
     // but use these hard-coded values to "exactly" reproduce old code
     //
@@ -314,13 +352,13 @@ int NuMIFlux::calcEnuWgt( FluxNtuple* decay, const TVector3& xyz,
     const double kK0MASS = 0.49767;
     const double kMUMASS = 0.105658389;
     const double kOMEGAMASS = 1.67245;
-    
+
     /*
      const int kpdg_nue       =   12;  // extended Geant 53
      const int kpdg_nuebar    =  -12;  // extended Geant 52
      const int kpdg_numu      =   14;  // extended Geant 56
      const int kpdg_numubar   =  -14;  // extended Geant 55
-     
+
      const int kpdg_muplus     =   -13;  // Geant  5
      const int kpdg_muminus    =    13;  // Geant  6
      const int kpdg_pionplus   =   211;  // Geant  8
@@ -333,14 +371,14 @@ int NuMIFlux::calcEnuWgt( FluxNtuple* decay, const TVector3& xyz,
      const int kpdg_omegaminus =  3334;  // Geant 24
      const int kpdg_omegaplus  = -3334;  // Geant 32
      */
-    
+
     // Marco: redefine (hopefully just for now)
-    
+
     const int kpdg_nue       =   53;  // extended Geant 53
     const int kpdg_nuebar    =  52;  // extended Geant 52
     const int kpdg_numu      =   56;  // extended Geant 56
     const int kpdg_numubar   =  55;  // extended Geant 55
-    
+
     const int kpdg_muplus     =   5;  // Geant  5
     const int kpdg_muminus    =    6;  // Geant  6
     const int kpdg_pionplus   =   8;  // Geant  8
@@ -352,25 +390,25 @@ int NuMIFlux::calcEnuWgt( FluxNtuple* decay, const TVector3& xyz,
     const int kpdg_kaonminus  =  12;  // Geant 12
     const int kpdg_omegaminus =  24;  // Geant 24
     const int kpdg_omegaplus  = 32;  // Geant 32
-    
+
     // Marco: end
-    
-    
-    
+
+
+
     const double kRDET = 100.0;   // set to flux per 100 cm radius
-    
+
     double xpos = xyz.X();
     double ypos = xyz.Y();
     double zpos = xyz.Z();
-    
+
     enu    = 0.0;  // don't know what the final value is
     wgt_xy = 0.0;  // but set these in case we return early due to error
-    
-    
+
+
     // in principle we should get these from the particle DB
     // but for consistency testing use the hardcoded values
     double parent_mass = kPIMASS;
-    
+
     /*
      if ( decay->ptype == kpdg_pionminus)  parent_mass = kPIMASS;
      if ( decay->ptype == kpdg_kaonminus)  parent_mass = kKMASS;
@@ -406,31 +444,31 @@ int NuMIFlux::calcEnuWgt( FluxNtuple* decay, const TVector3& xyz,
             assert(0);
             return 1;
     }
-    
-    
-    
-    
+
+
+
+
     double parentp2 = ( decay->pdPx*decay->pdPx +
                        decay->pdPy*decay->pdPy +
                        decay->pdPz*decay->pdPz );
     double parent_energy = TMath::Sqrt( parentp2 +
                                        parent_mass*parent_mass);
     double parentp = TMath::Sqrt( parentp2 );
-    
+
     double gamma     = parent_energy / parent_mass;
     double gamma_sqr = gamma * gamma;
     double beta_mag  = TMath::Sqrt( ( gamma_sqr - 1.0 )/gamma_sqr );
-    
+
     // Get the neutrino energy in the parent decay CM
     double enuzr = decay->Necm;
     // Get angle from parent line of flight to chosen point in beam frame
     double rad = TMath::Sqrt( (xpos-decay->Vx)*(xpos-decay->Vx) +
                              (ypos-decay->Vy)*(ypos-decay->Vy) +
                              (zpos-decay->Vz)*(zpos-decay->Vz) );
-    
+
     double emrat = 1.0;
     double costh_pardet = -999., theta_pardet = -999.;
-    
+
     // boost correction, but only if parent hasn't stopped
     if ( parentp > 0. ) {
         costh_pardet = ( decay->pdPx*(xpos-decay->Vx) +
@@ -440,16 +478,16 @@ int NuMIFlux::calcEnuWgt( FluxNtuple* decay, const TVector3& xyz,
         if ( costh_pardet >  1.0 ) costh_pardet =  1.0;
         if ( costh_pardet < -1.0 ) costh_pardet = -1.0;
         theta_pardet = TMath::ACos(costh_pardet);
-        
+
         // Weighted neutrino energy in beam, approx, good for small theta
         emrat = 1.0 / ( gamma * ( 1.0 - beta_mag * costh_pardet ));
     }
-    
+
     enu = emrat * enuzr;  // the energy ... normally
-    
-    
-    
-    
+
+
+
+
     // Get solid angle/4pi for detector element
     // small angle approximation, fixed by Alex Radovic
     //SAA//  double sangdet = ( kRDET*kRDET /
@@ -458,16 +496,16 @@ int NuMIFlux::calcEnuWgt( FluxNtuple* decay, const TVector3& xyz,
                                      ( (ypos-decay->Vy)*(ypos-decay->Vy) ) +
                                      ( (zpos-decay->Vz)*(zpos-decay->Vz) )   );
     double sangdet = (1.0-TMath::Cos(TMath::ATan( kRDET / sanddetcomp )))/2.0;
-    
+
     // Weight for solid angle and lorentz boost
     wgt_xy = sangdet * ( emrat * emrat );  // ! the weight ... normally
-    
+
     // Done for all except polarized muon decay
     // in which case need to modify weight
     // (must be done in double precision)
     if ( decay->ptype == kpdg_muplus || decay->ptype == kpdg_muminus) {
         double beta[3], p_dcm_nu[4], p_nu[3], p_pcm_mp[3], partial;
-        
+
         // Boost neu neutrino to mu decay CM
         beta[0] = decay->pdPx / parent_energy;
         beta[1] = decay->pdPy / parent_energy;
@@ -488,10 +526,10 @@ int NuMIFlux::calcEnuWgt( FluxNtuple* decay, const TVector3& xyz,
         p_dcm_nu[3] = TMath::Sqrt( p_dcm_nu[0]*p_dcm_nu[0] +
                                   p_dcm_nu[1]*p_dcm_nu[1] +
                                   p_dcm_nu[2]*p_dcm_nu[2] );
-        
-        
-        
-        
+
+
+
+
         // Boost parent of mu to mu production CM
         double particle_energy = decay->ppenergy;
         gamma = particle_energy/parent_mass;
@@ -508,7 +546,7 @@ int NuMIFlux::calcEnuWgt( FluxNtuple* decay, const TVector3& xyz,
         double p_pcm = TMath::Sqrt ( p_pcm_mp[0]*p_pcm_mp[0] +
                                     p_pcm_mp[1]*p_pcm_mp[1] +
                                     p_pcm_mp[2]*p_pcm_mp[2] );
-        
+
         const double eps = 1.0e-30;  // ? what value to use
         if ( p_pcm < eps || p_dcm_nu[3] < eps ) {
             return 3; // mu missing parent info?
@@ -528,7 +566,7 @@ int NuMIFlux::calcEnuWgt( FluxNtuple* decay, const TVector3& xyz,
          double xnu = 2.0 * enuzr / kMUMASS;
          wgt_ratio = ( (3.0-2.0*xnu )  - (1.0-2.0*xnu)*costh ) / (3.0-2.0*xnu);
          }
-         */  
+         */
         switch ( decay->Ntype ) {
             case kpdg_nue:
             case kpdg_nuebar:
@@ -544,10 +582,10 @@ int NuMIFlux::calcEnuWgt( FluxNtuple* decay, const TVector3& xyz,
             default:
                 return 2; // bad neutrino type
         }
-        
+
         wgt_xy = wgt_xy * wgt_ratio;
-        
+
     } // ptype is muon
-    
+
     return 0;
 }
