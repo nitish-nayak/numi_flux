@@ -53,13 +53,10 @@ public :
   TTree* outTree;
   // TGraph *genieXsecNumuCC;
 
-  TFile* f = new TFile("NuMIFlux.root", "RECREATE");
-
-
   NuMIFlux(string pattern="/uboone/data/users/bnayak/ppfx/flugg_studies/flugg_files/rhc/*_7000.root");
   virtual ~NuMIFlux();
 
-  void CalculateFlux();
+  void CalculateFlux(string outfile="NuMIFlux.root");
   TVector3 RandomInTPC();
   TVector3 FromDetToBeam(const TVector3& det);
   double estimate_pots(int highest_potnum);

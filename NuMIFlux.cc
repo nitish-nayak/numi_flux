@@ -70,7 +70,7 @@ NuMIFlux::~NuMIFlux() {
 
 }
 
-void NuMIFlux::CalculateFlux() {
+void NuMIFlux::CalculateFlux(string outfile) {
 
   fluxNtuple = new FluxNtuple(cflux);
 
@@ -210,6 +210,7 @@ void NuMIFlux::CalculateFlux() {
   // Writing on file
   //
   //***************************************
+  TFile* f = new TFile(outfile.c_str(), "RECREATE");
 
   f->cd();
   numuFluxHisto  -> Write();
