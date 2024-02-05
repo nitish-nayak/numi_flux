@@ -13,5 +13,7 @@ ROOT.gROOT.SetBatch(True)
 
 from ROOT import NuMIFlux
 
-f = NuMIFlux("/uboone/data/users/bnayak/ppfx/flugg_studies/flugg_files/rhc/flugg*_70*.root")
-f.CalculateFlux("/uboone/data/users/bnayak/ppfx/flugg_studies/comparisons/flugg_rhc.root")
+#  f = NuMIFlux("/uboone/data/users/bnayak/ppfx/flugg_studies/flugg_files/rhc/flugg*_70*.root")
+#  f.CalculateFlux("/uboone/data/users/bnayak/ppfx/flugg_studies/comparisons/flugg_rhc.root")
+f = NuMIFlux("/uboone/data/users/bnayak/ppfx/flugg_studies/flugg_files/fhc/flugg*_00*.root")
+f.CalculateFlux("/uboone/data/users/bnayak/ppfx/flugg_studies/comparisons/flugg_fhc.root")
