@@ -1,7 +1,19 @@
 #define Dk2NuFlux_cxx
-#include <iostream>
-#include <iomanip>
+
+#include "dk2nu/tree/dk2nu.h"
+#include "dk2nu/tree/dkmeta.h"
+#include "dk2nu/tree/calcLocationWeights.h"
+// Nitish : Add ability to read in PPFX libraries
+#include "MakeReweight.h"
+
+using namespace NeutrinoFluxReweight;
+
 #include <string>
+#include <cstddef>
+#include <vector>
+#include <iostream>
+#include <stdlib.h>
+#include <iomanip>
 
 using namespace std;
 
@@ -17,11 +29,8 @@ using namespace std;
 #include <TDatabasePDG.h>
 
 #include "Dk2NuFlux.hh"
-#include "dk2nu/tree/dk2nu.h"
-#include "dk2nu/tree/dkmeta.h"
-#include "dk2nu/tree/calcLocationWeights.h"
 
-Dk2NuFlux::Dk2NuFlux(string pattern) {
+Dk2NuFlux::Dk2NuFlux(string pattern, string outfile) {
 
   const char* path = "/uboone/app/users/bnayak/flugg_reweight/flugg_pointing/NuMIFlux/FluggNtuple";
   if ( path ) {
@@ -31,6 +40,10 @@ Dk2NuFlux::Dk2NuFlux(string pattern) {
     gSystem->SetDynamicPath(libs.Data());
     // gSystem->Load("FluxNtuple_C.so");
   }
+  // gSystem->AddLinkedLibs("-lEG");
+  // gSystem->AddLinkedLibs("-L${PPFX_DIR}/lib -lppfx");
+  // gSystem->AddLinkedLibs("-L${DK2NU_LIB} -ldk2nuTree");
+  fout = new TFile(outfile.c_str(), "RECREATE");
 
   cflux = new TChain("dk2nuTree");
   cflux->Add(pattern.c_str());
@@ -62,6 +75,7 @@ Dk2NuFlux::Dk2NuFlux(string pattern) {
   outTree = new TTree("outTree", "outTree");
   outTree->Branch("nuE", &nuE, "nuE/F");
   outTree->Branch("wgt", &wgt, "wgt/F");
+  outTree->Branch("wgt_ppfx", &wgt_ppfx, "wgt_ppfx/F");
   outTree->Branch("ptype", &ptype, "ptype/I");
   outTree->Branch("ntype", &ntype, "ntype/I");
   outTree->Branch("ncascade", &ncascade, "ncascade/I");
@@ -71,10 +85,22 @@ Dk2NuFlux::Dk2NuFlux(string pattern) {
 }
 
 Dk2NuFlux::~Dk2NuFlux() {
-
+  fout->Close();
 }
 
-void Dk2NuFlux::CalculateFlux(string outfile) {
+void Dk2NuFlux::CalculateFlux() {
+
+  MakeReweight* fPPFXrw = MakeReweight::getInstance();
+  string fPPFXMode = "ubnumi";
+  gSystem->Setenv("MODE", fPPFXMode.c_str());
+  Int_t fSeed = 84;
+  fPPFXrw->setBaseSeed(fSeed); // used in EventWeight ubsim, shouldn't matter for CV
+  string inputOptions = "./ppfx/inputs_ubnumi.xml";
+  if(!(fPPFXrw->AlreadyInitialized())){
+    fPPFXrw->SetOptions(inputOptions);
+  }
+  std::cout << "Setup PPFX with seed " << fSeed << " from : " << inputOptions << std::endl;
+
 
   bsim::Dk2Nu* fDk2Nu = new bsim::Dk2Nu;
   bsim::DkMeta* fDkMeta= new bsim::DkMeta;
@@ -152,6 +178,15 @@ void Dk2NuFlux::CalculateFlux(string outfile) {
       case anue:
         anueFluxHisto->Fill(enu, weight);
         break;
+    }
+
+    // get ppfx weights
+    try {
+      fPPFXrw->calculateWeights(fDk2Nu, fDkMeta);
+      wgt_ppfx = fPPFXrw->GetCVWeight();
+    } catch (...) {
+      std::cout<<"Failed to calculate wgt"<<std::endl;
+      wgt_ppfx = 1.;
     }
 
     // // Now fill the contraint histograms for each file
@@ -260,8 +295,7 @@ void Dk2NuFlux::CalculateFlux(string outfile) {
   //
   //***************************************
 
-  TFile* f = new TFile(outfile.c_str(), "RECREATE");
-  f->cd();
+  fout->cd();
   numuFluxHisto  -> Write();
   anumuFluxHisto -> Write();
   nueFluxHisto   -> Write();
@@ -286,7 +320,7 @@ void Dk2NuFlux::CalculateFlux(string outfile) {
   //     genieXsecNuebarCC ->SetName("anue_tot_cc");
   //     genieXsecNuebarCC -> Write();
   // }
-  f->Close();
+  fPPFXrw->resetInstance();
 
 }
 

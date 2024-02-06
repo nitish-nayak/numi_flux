@@ -1,6 +1,8 @@
 #ifndef Dk2NuFlux_h
 #define Dk2NuFlux_h
 
+#pragma once
+
 #include <iostream>
 #include <iomanip>
 #include <string>
@@ -19,7 +21,6 @@ using namespace std;
 #include "dk2nu/tree/calcLocationWeights.h"
 
 // Krishan: Updated this script to take in the dk2u file format instead of flugg
-
 
 class Dk2NuFlux {
 public :
@@ -74,11 +75,11 @@ public :
   // TGraph *genieXsecNuebarCC;
 
 
-  Dk2NuFlux(string pattern="/cvmfs/uboone.osgstorage.org/stash/uboonebeam/numi_dk2nu_zero_threshold/FHC/g4numiv6_minervame_me000z200i_0_0000.root");
+  Dk2NuFlux(string pattern="/cvmfs/uboone.osgstorage.org/stash/uboonebeam/numi_dk2nu_zero_threshold/FHC/g4numiv6_minervame_me000z200i_0_0000.root", string outfile="NuMIFlux.root");
 
   virtual ~Dk2NuFlux();
 
-  void CalculateFlux(string outfile="NuMIFlux.root");
+  void CalculateFlux();
   TVector3 RandomInTPC();
   TVector3 FromDetToBeam(const TVector3& det);
   double estimate_pots(int highest_potnum);
@@ -88,12 +89,14 @@ private:
 
   Float_t nuE;
   Float_t wgt;
+  Float_t wgt_ppfx;
   Int_t ptype;
   Int_t ncascade;
   Int_t ntype;
   Int_t pmedium;
   Int_t decaytype;
 
+  TFile* fout;
 };
 
 #endif
