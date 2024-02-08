@@ -1,5 +1,5 @@
-#ifndef NuMIFlux_h
-#define NuMIFlux_h
+#ifndef FluggFlux_h
+#define FluggFlux_h
 
 #pragma once
 
@@ -15,10 +15,9 @@ using namespace std;
 #include "TSystem.h"
 #include "TVector3.h"
 
-#include "FluggNtuple/FluxNtuple.h"
-//#include "calcLocationWeights.h"
+#include "FluggTree.h"
 
-class NuMIFlux {
+class FluggFlux {
 public :
 
   int Nfiles = 0;
@@ -42,7 +41,7 @@ public :
 
   TChain *cflux;
 
-  FluxNtuple *fluxNtuple;
+  FluggTree *fluxNtuple;
 
   TH1D* numuFluxHisto;
   TH1D* anumuFluxHisto;
@@ -53,14 +52,14 @@ public :
   TTree* outTree;
   // TGraph *genieXsecNumuCC;
 
-  NuMIFlux(string pattern="/uboone/data/users/bnayak/ppfx/flugg_studies/flugg_files/rhc/*_7000.root");
-  virtual ~NuMIFlux();
+  FluggFlux(string pattern="/uboone/data/users/bnayak/ppfx/flugg_studies/flugg_files/rhc/*_7000.root");
+  virtual ~FluggFlux();
 
-  void CalculateFlux(string outfile="NuMIFlux.root");
+  void CalculateFlux(string outfile="FluggFlux.root");
   TVector3 RandomInTPC();
   TVector3 FromDetToBeam(const TVector3& det);
   double estimate_pots(int highest_potnum);
-  int calcEnuWgt( FluxNtuple* decay, const TVector3& xyz, double& enu, double& wgt_xy);
+  int calcEnuWgt( FluggTree* decay, const TVector3& xyz, double& enu, double& wgt_xy);
 
 private:
 

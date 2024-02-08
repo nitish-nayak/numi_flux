@@ -32,17 +32,6 @@ using namespace std;
 
 Dk2NuFlux::Dk2NuFlux(string pattern, string outfile) {
 
-  const char* path = "/uboone/app/users/bnayak/flugg_reweight/flugg_pointing/NuMIFlux/FluggNtuple";
-  if ( path ) {
-    TString libs = gSystem->GetDynamicPath();
-    libs += ":";
-    libs += path;
-    gSystem->SetDynamicPath(libs.Data());
-    // gSystem->Load("FluxNtuple_C.so");
-  }
-  // gSystem->AddLinkedLibs("-lEG");
-  // gSystem->AddLinkedLibs("-L${PPFX_DIR}/lib -lppfx");
-  // gSystem->AddLinkedLibs("-L${DK2NU_LIB} -ldk2nuTree");
   fout = new TFile(outfile.c_str(), "RECREATE");
 
   cflux = new TChain("dk2nuTree");

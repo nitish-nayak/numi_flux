@@ -1,6 +1,4 @@
-#define NuMIFlux_cxx
-
-#pragma once
+#define FluggFlux_cxx
 
 #include <iostream>
 #include <iomanip>
@@ -17,23 +15,11 @@ using namespace std;
 #include "TFile.h"
 #include "TGraph.h"
 
-#include "NuMIFlux.hh"
+#include "FluggFlux.hh"
 
-//#include "dk2nu.h"
-//#include "dkmeta.h"
-//#include "calcLocationWeights.cxx"
-//#include "FluxNtuple_C.so"
+FluggFlux::FluggFlux(string pattern) {
 
-NuMIFlux::NuMIFlux(string pattern) {
-
-  const char* path = "/uboone/app/users/bnayak/flugg_reweight/flugg_pointing/NuMIFlux/FluggNtuple";
-  if ( path ) {
-    TString libs = gSystem->GetDynamicPath();
-    libs += ":";
-    libs += path;
-    gSystem->SetDynamicPath(libs.Data());
-    gSystem->Load("FluxNtuple_C.so");
-  }
+  gSystem->Load("FluggTree_C.so");
 
   cflux = new TChain("h10");
   cflux->Add(pattern.c_str());
@@ -66,13 +52,13 @@ NuMIFlux::NuMIFlux(string pattern) {
   outTree->Branch("decaytype", &decaytype, "decaytype/I");
 }
 
-NuMIFlux::~NuMIFlux() {
+FluggFlux::~FluggFlux() {
 
 }
 
-void NuMIFlux::CalculateFlux(string outfile) {
+void FluggFlux::CalculateFlux(string outfile) {
 
-  fluxNtuple = new FluxNtuple(cflux);
+  fluxNtuple = new FluggTree(cflux);
 
   //***************************************
   //
@@ -230,7 +216,7 @@ void NuMIFlux::CalculateFlux(string outfile) {
 
 
 //___________________________________________________________________________
-TVector3 NuMIFlux::RandomInTPC() {
+TVector3 FluggFlux::RandomInTPC() {
 
     TDatime *d = new TDatime;
     TRandom *r = new TRandom(d->GetTime());
@@ -251,7 +237,7 @@ TVector3 NuMIFlux::RandomInTPC() {
 
 
 //___________________________________________________________________________
-TVector3 NuMIFlux::FromDetToBeam( const TVector3& det ) {
+TVector3 FluggFlux::FromDetToBeam( const TVector3& det ) {
 
     TVector3 beam;
     TRotation R;
@@ -299,7 +285,7 @@ TVector3 NuMIFlux::FromDetToBeam( const TVector3& det ) {
 
 
 //___________________________________________________________________________
-double NuMIFlux::estimate_pots(int highest_potnum) {
+double FluggFlux::estimate_pots(int highest_potnum) {
 
   // Stolen: https://cdcvs.fnal.gov/redmine/projects/dk2nu/repository/show/trunk/dk2nu
   // looks like low counts are due to "evtno" not including
@@ -322,7 +308,7 @@ double NuMIFlux::estimate_pots(int highest_potnum) {
 
 
 //___________________________________________________________________________
-int NuMIFlux::calcEnuWgt( FluxNtuple* decay, const TVector3& xyz,
+int FluggFlux::calcEnuWgt( FluggTree* decay, const TVector3& xyz,
                          double& enu, double& wgt_xy)
 {
 

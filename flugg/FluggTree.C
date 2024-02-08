@@ -1,14 +1,14 @@
-#define FluxNtuple_cxx
-#include "FluxNtuple.h"
+#define FluggTree_cxx
+#include "FluggTree.h"
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
 
-void FluxNtuple::Loop()
+void FluggTree::Loop()
 {
 //   In a ROOT session, you can do:
-//      root> .L FluxNtuple.C
-//      root> FluxNtuple t
+//      root> .L FluggTree.C
+//      root> FluggTree t
 //      root> t.GetEntry(12); // Fill t data members with entry number 12
 //      root> t.Show();       // Show values of entry 12
 //      root> t.Show(16);     // Read and show values of entry 16
