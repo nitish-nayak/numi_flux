@@ -3,3 +3,6 @@
 *.d
 *.root
 *ACLiC*
+lib/
+dict/
+*Dict.cxx
