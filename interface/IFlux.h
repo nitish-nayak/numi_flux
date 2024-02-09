@@ -19,7 +19,7 @@ public:
   TVector3 FromDetToBeam(const TVector3& det) const;
   double EstimatePOT(int highest_potnum) const;
 
-  virtual void CalculateFlux() const = 0;
+  virtual void CalculateFlux() = 0;
   virtual int CalculateWeight() = 0;
 
   void SetDebug(){ fDebug = true; }
