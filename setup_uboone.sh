@@ -11,8 +11,9 @@ setup(){
     # setup for jobsub client
     # according to the prescription in Mike Kirby's talk
     # minerva doc-10551, Dec 2014 (same doc can be found for other experiments)
-    export LD_LIBRARY_PATH=$PPFX_DIR/lib:$PWD/lib:$LD_LIBRARY_PATH
     export NUMIANA_DIR=${PWD}
+    export NUMIANA_INC=${NUMIANA_DIR}/include
+    export LD_LIBRARY_PATH=${NUMIANA_DIR}/lib:${NUMIANA_DIR}/dict:${PPFX_DIR}/lib:$LD_LIBRARY_PATH
 }
 HOST=$(hostname -f)
 echo $HOST

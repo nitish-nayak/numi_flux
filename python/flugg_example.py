@@ -3,9 +3,7 @@ import sys
 import re
 import ROOT
 
-ROOT.gInterpreter.AddIncludePath('../include')
-ROOT.gInterpreter.AddIncludePath('../flugg')
-ROOT.gSystem.Load("../FluggFlux_cc.so")
+ROOT.gSystem.Load("../lib/FluggFlux_cc.so")
 ROOT.gROOT.SetBatch(True)
 
 #  outfile='/uboone/data/users/bnayak/ppfx/flugg_studies/comparisons/flugg_rhc.root'

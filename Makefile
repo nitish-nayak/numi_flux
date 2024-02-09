@@ -1,5 +1,5 @@
-INCLUDES = -I./include -I$(shell root-config --incdir)
-DK2NU_INCLUDES = -I./include -I$(PPFX_DIR)/include -I$(shell root-config --incdir) -I$(BOOSTROOT) -I${DK2NU}/include
+INCLUDES = -I$(shell root-config --incdir) -I$(NUMIANA_INC)
+DK2NU_INCLUDES = -I$(PPFX_DIR)/include -I$(shell root-config --incdir) -I$(BOOSTROOT) -I${DK2NU}/include -I$(NUMIANA_INC)
 DEPLIBS=$(shell root-config --libs)
 
 CC	=	g++
@@ -18,21 +18,19 @@ base: $(SRCS)
 
 flugg: FluggDict.cxx
 	$(CC) $(COPTS) flugg/FluggTree.C -o flugg/FluggTree_C.so $(DEPLIBS) $(INCLUDES)
-	$(CC) $(COPTS) FluggDict.cxx flugg/FluggFlux.cc -o FluggFlux_cc.so $(DEPLIBS) $(INCLUDES) -I./flugg -L$(PWD)/lib -lnumi
+	$(CC) $(COPTS) dict/FluggDict.cxx flugg/FluggFlux.cc -o lib/FluggFlux_cc.so $(DEPLIBS) $(INCLUDES) -I$(NUMIANA_DIR)/flugg -L$(PWD)/lib -lnumi
 
 FluggDict.cxx:
-	rootcling -f $@ -c $(INCLUDES) -I./flugg -p $(HEADERS) FluggFlux.h LinkDef.h
+	rootcling -f dict/$@ -c $(INCLUDES) -I$(NUMIANA_DIR)/flugg -p $(HEADERS) FluggFlux.h LinkDef.h
 
 dk2nu: Dk2NuDict.cxx
-	$(CC) $(COPTS) Dk2NuDict.cxx dk2nu/Dk2NuFlux.cc -o Dk2NuFlux_cc.so $(DEPLIBS) -lEG -L$(PWD)/lib -lnumi -L$(PPFX_DIR)/lib -lppfx -L${DK2NU_LIB} -ldk2nuTree $(DK2NU_INCLUDES) -I./dk2nu
+	$(CC) $(COPTS) dict/Dk2NuDict.cxx dk2nu/Dk2NuFlux.cc -o lib/Dk2NuFlux_cc.so $(DEPLIBS) -lEG -L$(PWD)/lib -lnumi -L$(PPFX_DIR)/lib -lppfx -L${DK2NU_LIB} -ldk2nuTree $(DK2NU_INCLUDES) -I$(NUMIANA_DIR)/dk2nu
 
 Dk2NuDict.cxx:
-	rootcling -f $@ -c $(DK2NU_INCLUDES) -I./dk2nu -p $(HEADERS) Dk2NuFlux.h LinkDef.h
+	rootcling -f dict/$@ -c $(DK2NU_INCLUDES) -I$(NUMIANA_DIR)/dk2nu -p $(HEADERS) Dk2NuFlux.h LinkDef.h
 
 clean:
 	rm -rv lib/*
-	rm *Dict.cxx
-	rm *.pcm
-	rm *.so
+	rm dict/*Dict.cxx
+	rm dict/*.pcm
 	rm flugg/*.so
-	rm dk2nu/*.so
