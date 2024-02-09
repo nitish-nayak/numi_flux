@@ -88,19 +88,19 @@ void FluggFlux::CalculateFlux()
 
     // Fill the histograms
     switch (fluxNtuple->Ntype) {
-      case kpdg_numu:
+      case kgeant_numu:
         fOutput->numuFluxHisto->Fill(enu, weight);
         fOutput->ntype = kpdg_numu;
         break;
-      case kpdg_numubar:
+      case kgeant_numubar:
         fOutput->anumuFluxHisto->Fill(enu, weight);
         fOutput->ntype = kpdg_numubar;
         break;
-      case kpdg_nue:
+      case kgeant_nue:
         fOutput->nueFluxHisto->Fill(enu, weight);
         fOutput->ntype = kpdg_nue;
         break;
-      case kpdg_nuebar:
+      case kgeant_nuebar:
         fOutput->anueFluxHisto->Fill(enu, weight);
         fOutput->ntype = kpdg_nuebar;
         break;
@@ -299,7 +299,7 @@ int FluggFlux::CalculateWeight(FluggTree* decay, const TVector3& xyz,
     // Done for all except polarized muon decay
     // in which case need to modify weight
     // (must be done in double precision)
-    if ( decay->ptype == kpdg_muplus || decay->ptype == kpdg_muminus) {
+    if ( decay->ptype == kgeant_muplus || decay->ptype == kgeant_muminus) {
         double beta[3], p_dcm_nu[4], p_nu[3], p_pcm_mp[3], partial;
 
         // Boost neu neutrino to mu decay CM
@@ -364,12 +364,12 @@ int FluggFlux::CalculateWeight(FluggTree* decay, const TVector3& xyz,
          }
          */
         switch ( decay->Ntype ) {
-            case kpdg_nue:
-            case kpdg_nuebar:
+            case kgeant_nue:
+            case kgeant_nuebar:
                 wgt_ratio = 1.0 - costh;
                 break;
-            case kpdg_numu:
-            case kpdg_numubar:
+            case kgeant_numu:
+            case kgeant_numubar:
             {
                 double xnu = 2.0 * enuzr / kMUMASS;
                 wgt_ratio = ( (3.0-2.0*xnu )  - (1.0-2.0*xnu)*costh ) / (3.0-2.0*xnu);
