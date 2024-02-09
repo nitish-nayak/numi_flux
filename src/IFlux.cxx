@@ -7,6 +7,7 @@
 #include "TRandom.h"
 #include "TRotation.h"
 #include "TMath.h"
+#include "TDatime.h"
 
 #include "IFlux.h"
 
@@ -55,19 +56,19 @@ TVector3 IFlux::FromDetToBeam( const TVector3& det ) const
 
   R.RotateAxes(newX,newY,newZ);
   if (fDebug) {
-    cout << "R_{beam to det} = " << endl;
-    cout << " [ " << R.XX() << " " << R.XY() << " " << R.XZ() << " ] " << endl;
-    cout << " [ " << R.YX() << " " << R.YY() << " " << R.YZ() << " ] " << endl;
-    cout << " [ " << R.ZX() << " " << R.ZY() << " " << R.ZZ() << " ] " << endl;
-    cout << endl;
+    std::cout << "R_{beam to det} = " << std::endl;
+    std::cout << " [ " << R.XX() << " " << R.XY() << " " << R.XZ() << " ] " << std::endl;
+    std::cout << " [ " << R.YX() << " " << R.YY() << " " << R.YZ() << " ] " << std::endl;
+    std::cout << " [ " << R.ZX() << " " << R.ZY() << " " << R.ZZ() << " ] " << std::endl;
+    std::cout << std::endl;
   }
   R.Invert(); // R is now the inverse
   if (fDebug) {
-    cout << "R_{det to beam} = " << endl;
-    cout << " [ " << R.XX() << " " << R.XY() << " " << R.XZ() << " ] " << endl;
-    cout << " [ " << R.YX() << " " << R.YY() << " " << R.YZ() << " ] " << endl;
-    cout << " [ " << R.ZX() << " " << R.ZY() << " " << R.ZZ() << " ] " << endl;
-    cout << endl;
+    std::cout << "R_{det to beam} = " << std::endl;
+    std::cout << " [ " << R.XX() << " " << R.XY() << " " << R.XZ() << " ] " << std::endl;
+    std::cout << " [ " << R.YX() << " " << R.YY() << " " << R.YZ() << " ] " << std::endl;
+    std::cout << " [ " << R.ZX() << " " << R.ZY() << " " << R.ZZ() << " ] " << std::endl;
+    std::cout << std::endl;
   }
   // Now R allows to go from detector to beam coordinates.
   // NuMIDet is vector from NuMI target to uB detector (in beam coordinates)

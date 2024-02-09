@@ -26,5 +26,5 @@ public:
 
 private:
   bool fDebug = false;
-}
+};
 #endif

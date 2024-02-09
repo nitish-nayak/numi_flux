@@ -39,5 +39,5 @@ struct RootOutput
   double histMin    = 0.;
   double histMax    = 20.;
   int histNbins     = 4000;
-}
+};
 #endif
