@@ -3,6 +3,7 @@
 #include "dk2nu/tree/dk2nu.h"
 #include "dk2nu/tree/dkmeta.h"
 #include "dk2nu/tree/calcLocationWeights.h"
+
 // Nitish : Add ability to read in PPFX libraries
 #include "MakeReweight.h"
 
@@ -28,63 +29,33 @@ using namespace std;
 #include <TParticlePDG.h>
 #include <TDatabasePDG.h>
 
-#include "Dk2NuFlux.hh"
+#include "Dk2NuFlux.h"
 
-Dk2NuFlux::Dk2NuFlux(string pattern, string outfile) {
-
-  fout = new TFile(outfile.c_str(), "RECREATE");
-
+//___________________________________________________________________________
+Dk2NuFlux::Dk2NuFlux(std::string pattern, std::string outfile)
+{
   cflux = new TChain("dk2nuTree");
   cflux->Add(pattern.c_str());
 
   cflux_meta = new TChain("dkmetaTree");
   cflux_meta->Add(pattern.c_str());
 
-  Nfiles = cflux->GetNtrees();
-  cout << "Number of files: " << Nfiles << endl;
+  Int_t nfiles = cflux->GetNtrees();
+  std::cout << "Number of files: " << nfiles << std::endl;
 
-  //Inizialise histos
-  TString titleBase1 = "Neutrino Flux;";
-  TString titleBase2 = " Energy [GeV];";
-  TString titleBase3 = " / cm^{2} / 6e20 POT";
-  // numu
-  numuFluxHisto = new TH1D("numuFluxHisto", (titleBase1 + "#nu_{#mu}" + titleBase2 +"#nu_{#mu}" + titleBase3),histNbins,histMin,histMax);
-  numuCCHisto = new TH1D("numuCCHisto", "numu CC; #nu_{#mu} Energy [GeV]; #nu_{#mu} CC / 79 ton / 6e20 POT",histNbins,histMin,histMax);
-  // anumu
-  anumuFluxHisto = new TH1D("anumuFluxHisto", (titleBase1 + "#bar{#nu}_{#mu}" + titleBase2 +"#bar{#nu}_{#mu}" + titleBase3),histNbins,histMin,histMax);
-  anumuCCHisto = new TH1D("anumuCCHisto", "numu bar CC; #bar{#nu}_{#mu} Energy [GeV]; #bar{#nu}_{#mu} CC / 79 ton / 6e20 POT",histNbins,histMin,histMax);
-  // nue
-  nueFluxHisto = new TH1D("nueFluxHisto", (titleBase1 + "#nu_{e}" + titleBase2 +"#nu_{e}" + titleBase3),histNbins,histMin,histMax);
-  nueCCHisto = new TH1D("nueCCHisto", "nue CC; #nu_{e} Energy [GeV]; #nu_{e} CC / 79 ton / 6e20 POT",histNbins,histMin,histMax);
-  // anue
-  anueFluxHisto = new TH1D("anueFluxHisto", (titleBase1 + "#bar{#nu}_{e}" + titleBase2 + "#bar{#nu}_{e}" + titleBase3),histNbins,histMin,histMax);
-  anueCCHisto = new TH1D("anueCCHisto", "nue bar CC; #bar{#nu}_{e} Energy [GeV]; #bar{#nu}_{#mu} CC / 79 ton / 6e20 POT",histNbins,histMin,histMax);
-  hPOT = new TH1D("POT", "Total POT", 1, 0, 1);
-
-  outTree = new TTree("outTree", "outTree");
-  outTree->Branch("nuE", &nuE, "nuE/F");
-  outTree->Branch("wgt", &wgt, "wgt/F");
-  outTree->Branch("wgt_ppfx", &wgt_ppfx, "wgt_ppfx/F");
-  outTree->Branch("ptype", &ptype, "ptype/I");
-  outTree->Branch("ntype", &ntype, "ntype/I");
-  outTree->Branch("ncascade", &ncascade, "ncascade/I");
-  outTree->Branch("pmedium", &pmedium, "pmedium/I");
-  outTree->Branch("decaytype", &decaytype, "decaytype/I");
-
+  fOutput = new RootOutput(outfile);
 }
 
-Dk2NuFlux::~Dk2NuFlux() {
-  fout->Close();
-}
-
-void Dk2NuFlux::CalculateFlux() {
-
+//___________________________________________________________________________
+void Dk2NuFlux::CalculateFlux()
+{
+  // initialize ppfx
   MakeReweight* fPPFXrw = MakeReweight::getInstance();
-  string fPPFXMode = "ubnumi";
+  std::string fPPFXMode = "ubnumi_cvonly";
   gSystem->Setenv("MODE", fPPFXMode.c_str());
   Int_t fSeed = 84;
   fPPFXrw->setBaseSeed(fSeed); // used in EventWeight ubsim, shouldn't matter for CV
-  string inputOptions = "./ppfx/inputs_ubnumi.xml";
+  std::string inputOptions = std::string(std::getenv("NUMIANA_DIR"))+"/dk2nu/ppfx/inputs_"+fPPFXMode+".xml";
   if(!(fPPFXrw->AlreadyInitialized())){
     fPPFXrw->SetOptions(inputOptions);
   }
@@ -102,8 +73,11 @@ void Dk2NuFlux::CalculateFlux() {
   //
   //***************************************
 
+  int treeNumber = -1;
+  int highest_evtno = 0;
   Long64_t nflux = cflux->GetEntries();
   std::cout << "Total number of entries: " << nflux << std::endl;
+
   for (Long64_t i=0; i < nflux; ++i ) {
 
     // Get entry i. fluxNtuple is now filled with entry i info.
@@ -111,13 +85,13 @@ void Dk2NuFlux::CalculateFlux() {
     cflux_meta->GetEntry(i);
 
     // Alert the user
-    if (i % 100000 == 0) cout << "On entry " << i/1.0e6 << " M"<< endl;
+    if (i % 100000 == 0) std::cout << "On entry " << i/1.0e6 << " M"<< std::endl;
 
     if(treeNumber != cflux->GetTreeNumber()) {
       treeNumber = cflux->GetTreeNumber();
       std::cout << "Moving to tree number " << treeNumber << "." << std::endl;
       AccumulatedPOT += fDkMeta->pots;
-      cout << "AccumulatedPOT: " << AccumulatedPOT << endl;
+      std::cout << "AccumulatedPOT: " << AccumulatedPOT << std::endl;
     }
 
     double wgt_xy = 0.;  // neutrino weight
@@ -125,23 +99,27 @@ void Dk2NuFlux::CalculateFlux() {
 
     // Pick a random point in the TPC (in detector coordinates)
     TVector3 xyz_det = RandomInTPC();
-    if (debug) cout << "xyz_det = [" << xyz_det.X() << ", " << xyz_det.Y() << ", " << xyz_det.Z() << "]" << endl;
+    if (fDebug) std::cout << "xyz_det = [" << xyz_det.X() << ", " <<
+                                              xyz_det.Y() << ", " <<
+                                              xyz_det.Z() << "]" << std::endl;
 
     // From detector to beam coordinates
     TVector3 xyz_beam = FromDetToBeam(xyz_det);
-    if (debug) cout << "xyz_beam = [" << xyz_beam.X() << ", " << xyz_beam.Y() << ", " << xyz_beam.Z() << "]" << endl;
+    if (fDebug) std::cout << "xyz_beam = [" << xyz_beam.X() << ", " <<
+                                               xyz_beam.Y() << ", " <<
+                                               xyz_beam.Z() << "]" << std::endl;
 
     // Neutrons are not yet implemented so skip for now
     // if (fDk2Nu->decay.ptype == 2112) continue;
 
     // Calculate the weight
-    int ret = calcEnuWgt(fDk2Nu, xyz_beam, enu, wgt_xy);
-    if (ret != 0) cout << "Error with calcEnuWgt. Return " << ret << endl;
-    if (debug) cout << "wgt_xy " << wgt_xy << endl;
+    int ret = CalculateWeight(fDk2Nu, xyz_beam, enu, wgt_xy);
+    if (ret != 0) std::cout << "Error with CalculateWeight. Return " << ret << std::endl;
+    if (fDebug) std::cout << "wgt_xy " << wgt_xy << std::endl;
 
 
     // Calculate the total weight
-    double weight = wgt_xy * fDk2Nu->decay.nimpwt * fDefaultWeightCorrection;
+    double weight = wgt_xy * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
 
     if (std::isnan(weight) == 1) { // catch NaN values
       std::cout << "got a nan: wgt\t" << weight << std::endl;
@@ -155,42 +133,38 @@ void Dk2NuFlux::CalculateFlux() {
 
     // Fill the histograms
     switch (fDk2Nu->decay.ntype) {
-      case numu:
-        numuFluxHisto->Fill(enu, weight);
+      case kpdg_numu:
+        fOutput->numuFluxHisto->Fill(enu, weight);
         break;
-      case anumu:
-        anumuFluxHisto->Fill(enu, weight);
+      case kpdg_numubar:
+        fOutput->anumuFluxHisto->Fill(enu, weight);
         break;
-      case nue:
-        nueFluxHisto->Fill(enu, weight);
+      case kpdg_nue:
+        fOutput->nueFluxHisto->Fill(enu, weight);
         break;
-      case anue:
-        anueFluxHisto->Fill(enu, weight);
+      case kpdg_nuebar:
+        fOutput->anueFluxHisto->Fill(enu, weight);
         break;
     }
 
     // get ppfx weights
     try {
       fPPFXrw->calculateWeights(fDk2Nu, fDkMeta);
-      wgt_ppfx = fPPFXrw->GetCVWeight();
+      fOutput->wgt_ppfx = fPPFXrw->GetCVWeight();
     } catch (...) {
       std::cout<<"Failed to calculate wgt"<<std::endl;
-      wgt_ppfx = 1.;
+      fOutput->wgt_ppfx = 1.;
     }
 
-    // // Now fill the contraint histograms for each file
-    // GetConstraints_ThinTarg( fDk2Nu );
-    // GetConstraints_ThickTarg(fDk2Nu);
-    nuE = enu;
-    wgt = weight;
-    ptype = fDk2Nu->decay.ptype;
-    ntype = fDk2Nu->decay.ntype;
-    ncascade = fDk2Nu->tgtexit.tgen;
-    pmedium = fDk2Nu->decay.ppmedium;
-    decaytype = fDk2Nu->decay.ndecay;
+    fOutput->nuE = enu;
+    fOutput->wgt = weight;
+    fOutput->ptype = fDk2Nu->decay.ptype;
+    fOutput->ntype = fDk2Nu->decay.ntype;
+    fOutput->ncascade = fDk2Nu->tgtexit.tgen;
+    fOutput->pmedium = fDk2Nu->decay.ppmedium;
+    fOutput->decaytype = fDk2Nu->decay.ndecay;
 
-    outTree->Fill();
-
+    (fOutput->outTree)->Fill();
 
   } // end of loop over the entries
 
@@ -201,288 +175,73 @@ void Dk2NuFlux::CalculateFlux() {
   //
   //***************************************
 
-  double scale =    NominalPOT/AccumulatedPOT;
-  hPOT->SetBinContent(1, AccumulatedPOT);
-  numuFluxHisto  -> Scale(scale);
-  anumuFluxHisto -> Scale(scale);
-  nueFluxHisto   -> Scale(scale);
-  anueFluxHisto  -> Scale(scale);
+  double scale =    kNominalPOT/AccumulatedPOT;
+  (fOutput->hPOT)->SetBinContent(1, AccumulatedPOT);
+  (fOutput->numuFluxHisto)  -> Scale(scale);
+  (fOutput->anumuFluxHisto) -> Scale(scale);
+  (fOutput->nueFluxHisto)   -> Scale(scale);
+  (fOutput->anueFluxHisto)  -> Scale(scale);
 
-  // // Constrained Histograms
-  // pionplus_NA49  -> Scale(scale);
-  // pionplus_MIPP  -> Scale(scale);
-  // pionminus_NA49 -> Scale(scale);
-  // pionminus_MIPP -> Scale(scale);
-  // Kplus_NA49     -> Scale(scale);
-  // Kplus_MIPP     -> Scale(scale);
-  // Kminus_NA49    -> Scale(scale);
-  // Kminus_MIPP    -> Scale(scale);
-  cout << endl << ">>> TOTAL POT: " << AccumulatedPOT << endl << endl;
-
-
-  //***************************************
-  //
-  // Apply now GENIE xsec
-  //
-  // source /nusoft/app/externals/setup
-  // setup genie_xsec R-2_8_0   -q default
-  // root -l  $GENIEXSECPATH/xsec_graphs.root
-  // >  _file0->cd("nu_mu_Ar40")
-  // >  tot_cc->Draw()
-  //
-  //***************************************
-
-  // const char* genieXsecPath = gSystem->ExpandPathName("$(GENIEXSECPATH)");
-  // if ( !genieXsecPath ) {
-  //     std::cout << "$(GENIEXSECPATH) not defined." << std::endl;
-  //     std::cout << "Please setup *genie_xsec*. (setup genie_xsec R-2_8_0   -q default)." << std::endl;
-  // }
-  //
-  // if ( genieXsecPath ) {
-  //     TString genieXsecFileName = genieXsecPath;
-  //     genieXsecFileName += "/xsec_graphs.root";
-  //     TFile *genieXsecFile = new TFile(genieXsecFileName,"READ");
-  //     genieXsecNumuCC    = (TGraph *) genieXsecFile->Get("nu_mu_Ar40/tot_cc");
-  //     genieXsecNumubarCC = (TGraph *) genieXsecFile->Get("nu_mu_bar_Ar40/tot_cc");
-  //     genieXsecNueCC     = (TGraph *) genieXsecFile->Get("nu_e_Ar40/tot_cc");
-  //     genieXsecNuebarCC  = (TGraph *) genieXsecFile->Get("nu_e_bar_Ar40/tot_cc");
-  //     genieXsecFile->Close();
-  //
-  //     // TSpline3* genieXsecSplineNumuCC = new TSpline3("genieXsecSplineNumuCC", genieXsecNumuCC, "", 0,6);
-  //
-  //     double value;
-  //     for(int i=1; i<histNbins+1; i++) {
-  //         value = numuFluxHisto->GetBinContent(i);
-  //         value *= genieXsecNumuCC->Eval(numuFluxHisto->GetBinCenter(i)); // Eval implies linear interpolation
-  //         value *= (1e-38 * Ntarget/40.); // 1/40 is due to I'm considering nu_mu_Ar40.
-  //         numuCCHisto->SetBinContent(i, value);
-  //
-  //         value = anumuFluxHisto->GetBinContent(i);
-  //         value *= genieXsecNumubarCC->Eval(anumuFluxHisto->GetBinCenter(i)); // Eval implies linear interpolation
-  //         value *= (1e-38 * Ntarget/40.); // 1/40 is due to I'm considering nu_mu_Ar40.
-  //         anumuCCHisto->SetBinContent(i, value);
-  //
-  //         value = nueFluxHisto->GetBinContent(i);
-  //         value *= genieXsecNueCC->Eval(nueFluxHisto->GetBinCenter(i)); // Eval implies linear interpolation
-  //         value *= (1e-38 * Ntarget/40.); // 1/40 is due to I'm considering nu_mu_Ar40.
-  //         nueCCHisto->SetBinContent(i, value);
-  //
-  //         value = anueFluxHisto->GetBinContent(i);
-  //         value *= genieXsecNuebarCC->Eval(anueFluxHisto->GetBinCenter(i)); // Eval implies linear interpolation
-  //         value *= (1e-38 * Ntarget/40.); // 1/40 is due to I'm considering nu_mu_Ar40.
-  //         anueCCHisto->SetBinContent(i, value);
-  //
-  //     }
-  // } // end if ( genieXsecPath )
-
-
-
+  std::cout << std::endl << ">>> TOTAL POT: " << AccumulatedPOT << std::endl << std::endl;
 
   //***************************************
   //
   // Writing on file
   //
   //***************************************
+  fOutput->Write();
 
-  fout->cd();
-  numuFluxHisto  -> Write();
-  anumuFluxHisto -> Write();
-  nueFluxHisto   -> Write();
-  anueFluxHisto  -> Write();
-
-  hPOT->Write();
-  outTree->Write();
-  // if ( genieXsecPath ) {
-  //     numuCCHisto     -> Write();
-  //     genieXsecNumuCC ->SetName("numu_tot_cc");
-  //     genieXsecNumuCC -> Write();
-  //
-  //     anumuCCHisto       -> Write();
-  //     genieXsecNumubarCC ->SetName("anumu_tot_cc");
-  //     genieXsecNumubarCC -> Write();
-  //
-  //     nueCCHisto     -> Write();
-  //     genieXsecNueCC ->SetName("nue_tot_cc");
-  //     genieXsecNueCC -> Write();
-  //
-  //     anueCCHisto       -> Write();
-  //     genieXsecNuebarCC ->SetName("anue_tot_cc");
-  //     genieXsecNuebarCC -> Write();
-  // }
+  // reset ppfx state
   fPPFXrw->resetInstance();
 
 }
 
-
 //___________________________________________________________________________
-TVector3 Dk2NuFlux::RandomInTPC() {
-
-  TDatime *d = new TDatime;
-  TRandom *r = new TRandom(d->GetTime());
-
-  double xTPC = 256.35;  // cm
-  double yTPC = 233.;  // cm
-  double zTPC = 1036.8; // cm
-
-  double x = r->Uniform(0., xTPC);
-  double y = r->Uniform(-yTPC/2., yTPC/2.);
-  double z = r->Uniform(0., zTPC);
-
-  TVector3 det;
-  det.SetXYZ(x,y,z);
-
-  delete d;
-  delete r;
-
-  return det;
-}
-//___________________________________________________________________________
-TVector3 Dk2NuFlux::FromDetToBeam( const TVector3& det ) {
-
-  TVector3 beam;
-  TRotation R;
-
-  //corrected rotation matrix using the 0,0,0 position for MicroBooNE
-  //Previous matrix is calculated relative to MiniBooNE, which is not in the centre of the BNB!
-
-  TVector3 newX(0.92103853804025682, 0.0000462540012621546684, -0.38947144863934974);
-  TVector3 newY(0.0227135048039241207, 0.99829162468141475, 0.0538324139386641073);
-  TVector3 newZ(0.38880857519374290, -0.0584279894529063024, 0.91946400794392302);
-  //old matrix
-  /*
-  TVector3 newX(0.921228671,   0.00136256111, -0.389019125);
-  TVector3 newY(0.0226872648,  0.998103714,    0.0572211871);
-  TVector3 newZ(0.388359401,  -0.061539578,    0.919450845);
-  */
-
-  R.RotateAxes(newX,newY,newZ);
-  if (debug) {
-    cout << "R_{beam to det} = " << endl;
-    cout << " [ " << R.XX() << " " << R.XY() << " " << R.XZ() << " ] " << endl;
-    cout << " [ " << R.YX() << " " << R.YY() << " " << R.YZ() << " ] " << endl;
-    cout << " [ " << R.ZX() << " " << R.ZY() << " " << R.ZZ() << " ] " << endl;
-    cout << endl;
-  }
-  R.Invert(); // R is now the inverse
-  if (debug) {
-    cout << "R_{det to beam} = " << endl;
-    cout << " [ " << R.XX() << " " << R.XY() << " " << R.XZ() << " ] " << endl;
-    cout << " [ " << R.YX() << " " << R.YY() << " " << R.YZ() << " ] " << endl;
-    cout << " [ " << R.ZX() << " " << R.ZY() << " " << R.ZZ() << " ] " << endl;
-    cout << endl;
-  }
-  // Now R allows to go from detector to beam coordinates.
-  // NuMIDet is vector from NuMI target to uB detector (in beam coordinates)
-  // Updated position - leaving old positions here (July 2018)
-  //TVector3 NuMIDet (54.499, 74.461,  677.611); // m
-  TVector3 NuMIDet (55.02, 72.59,  672.70); //m
-  NuMIDet *= 100.; // To have NuMIDet in cm
-
-  beam = R * det + NuMIDet;
-
-  return beam;
-}
-//___________________________________________________________________________
-// DEPRECIATED IN THIS CODE
-double Dk2NuFlux::estimate_pots(int highest_potnum) {
-
-  // Stolen: https://cdcvs.fnal.gov/redmine/projects/dk2nu/repository/show/trunk/dk2nu
-  // looks like low counts are due to "evtno" not including
-  // protons that miss the actual target (hit baffle, etc)
-  // this will vary with beam conditions parameters
-  // so we should round way up, those generating flugg files
-  // aren't going to quantize less than 1000
-  // though 500 would probably be okay, 100 would not.
-  // also can't use _last_ potnum because muons decay->> don't
-  // have theirs set
-
-  // Marco: Trying with 10000
-  const Int_t    nquant = 10000; //1000; // 500;  // 100
-  const Double_t rquant = nquant;
-
-  Int_t estimate = (TMath::FloorNint((highest_potnum-1)/rquant)+1)*nquant;
-  return estimate;
-}
-//___________________________________________________________________________
-int Dk2NuFlux::calcEnuWgt(bsim::Dk2Nu* decay, const TVector3& xyz,double& enu, double& wgt_xy){
-
-    // Neutrino Energy and Weight at arbitrary point
-    // Based on:
-    //   NuMI-NOTE-BEAM-0109 (MINOS DocDB # 109)
-    //   Title:   Neutrino Beam Simulation using PAW with Weighted Monte Carlos
-    //   Author:  Rick Milburn
-    //   Date:    1995-10-01
-    // History:
-    // jzh  3/21/96 grab R.H.Milburn's weighing routine
-    // jzh  5/ 9/96 substantially modify the weighting function use dot product
-    //              instead of rotation vecs to get theta get all info except
-    //              det from ADAMO banks neutrino parent is in Particle.inc
-    //              Add weighting factor for polarized muon decay
-    // jzh  4/17/97 convert more code to double precision because of problems
-    //              with Enu>30 GeV
-    // rwh 10/ 9/08 transliterate function from f77 to C++
-    // Original function description:
-    //   Real function for use with PAW Ntuple To transform from destination
-    //   detector geometry to the unit sphere moving with decaying hadron with
-    //   velocity v, BETA=v/c, etc..  For (pseudo)scalar hadrons the decays will
-    //   be isotropic in this  sphere so the fractional area (out of 4-pi) is the
-    //   fraction of decays that hit the target.  For a given target point and
-    //   area, and given x-y components of decay transverse location and slope,
-    //   and given decay distance from target ans given decay GAMMA and
-    //   rest-frame neutrino energy, the lab energy at the target and the
-    //   fractional solid angle in the rest-frame are determined.
-    //   For muon decays, correction for non-isotropic nature of decay is done.
-    // Arguments:
-    //    dk2nu    :: contains current decay information
-    //    xyz      :: 3-vector of position to evaluate
-    //                in *beam* frame coordinates  (cm units)
-    //    enu      :: resulting energy
-    //    wgt_xy   :: resulting weight
-    // Return:
-    //    (int)    :: error code
-    // Assumptions:
-    //    Energies given in GeV
-    //    Particle codes have been translated from GEANT into PDG codes
-    // for now ... these masses _should_ come from TDatabasePDG
-    // but use these hard-coded values to "exactly" reproduce old code
-    //
-    // old mass values are v01_07_* and before
-    // new mass values (v01_08_* and after) are Geant4 v4.10.3 values
-    //
-#ifdef HISTORIC_MASS
-  const double kPIMASS      = 0.13957;
-  const double kKMASS       = 0.49368;
-  const double kK0MASS      = 0.49767;
-  const double kMUMASS      = 0.105658389;
-  const double kOMEGAMASS   = 1.67245;
-#else
-  const double kPIMASS      = 0.1395701;     // 0.13957;
-  const double kKMASS       = 0.493677;      // 0.49368;
-  const double kK0MASS      = 0.497614;      // 0.49767;
-  const double kMUMASS      = 0.1056583715;  // 0.105658389;
-  const double kOMEGAMASS   = 1.67245;       // 1.67245;
-#endif
-  // from CLHEP/Units/PhysicalConstants.h
-  // used by Geant as CLHEP::neutron_mass_c2
-  const double kNEUTRONMASS = 0.93956536;
-  const int kpdg_nue       =   12;  // extended Geant 53
-  const int kpdg_nuebar    =  -12;  // extended Geant 52
-  const int kpdg_numu      =   14;  // extended Geant 56
-  const int kpdg_numubar   =  -14;  // extended Geant 55
-  const int kpdg_muplus      =   -13;  // Geant  5
-  const int kpdg_muminus     =    13;  // Geant  6
-  const int kpdg_pionplus    =   211;  // Geant  8
-  const int kpdg_pionminus   =  -211;  // Geant  9
-  const int kpdg_k0long      =   130;  // Geant 10  ( K0=311, K0S=310 )
-  const int kpdg_k0short     =   310;  // Geant 16
-  const int kpdg_k0mix       =   311;
-  const int kpdg_kaonplus    =   321;  // Geant 11
-  const int kpdg_kaonminus   =  -321;  // Geant 12
-  const int kpdg_omegaminus  =  3334;  // Geant 24
-  const int kpdg_omegaplus   = -3334;  // Geant 32
-  const int kpdg_neutron     =  2112;
-  const int kpdg_antineutron = -2112;
-  const double kRDET = 100.0;   // set to flux per 100 cm radius
+int Dk2NuFlux::CalculateWeight(bsim::Dk2Nu* decay, const TVector3& xyz,double& enu, double& wgt_xy)
+{
+  // Neutrino Energy and Weight at arbitrary point
+  // Based on:
+  //   NuMI-NOTE-BEAM-0109 (MINOS DocDB # 109)
+  //   Title:   Neutrino Beam Simulation using PAW with Weighted Monte Carlos
+  //   Author:  Rick Milburn
+  //   Date:    1995-10-01
+  // History:
+  // jzh  3/21/96 grab R.H.Milburn's weighing routine
+  // jzh  5/ 9/96 substantially modify the weighting function use dot product
+  //              instead of rotation vecs to get theta get all info except
+  //              det from ADAMO banks neutrino parent is in Particle.inc
+  //              Add weighting factor for polarized muon decay
+  // jzh  4/17/97 convert more code to double precision because of problems
+  //              with Enu>30 GeV
+  // rwh 10/ 9/08 transliterate function from f77 to C++
+  // Original function description:
+  //   Real function for use with PAW Ntuple To transform from destination
+  //   detector geometry to the unit sphere moving with decaying hadron with
+  //   velocity v, BETA=v/c, etc..  For (pseudo)scalar hadrons the decays will
+  //   be isotropic in this  sphere so the fractional area (out of 4-pi) is the
+  //   fraction of decays that hit the target.  For a given target point and
+  //   area, and given x-y components of decay transverse location and slope,
+  //   and given decay distance from target ans given decay GAMMA and
+  //   rest-frame neutrino energy, the lab energy at the target and the
+  //   fractional solid angle in the rest-frame are determined.
+  //   For muon decays, correction for non-isotropic nature of decay is done.
+  // Arguments:
+  //    dk2nu    :: contains current decay information
+  //    xyz      :: 3-vector of position to evaluate
+  //                in *beam* frame coordinates  (cm units)
+  //    enu      :: resulting energy
+  //    wgt_xy   :: resulting weight
+  // Return:
+  //    (int)    :: error code
+  // Assumptions:
+  //    Energies given in GeV
+  //    Particle codes have been translated from GEANT into PDG codes
+  // for now ... these masses _should_ come from TDatabasePDG
+  // but use these hard-coded values to "exactly" reproduce old code
+  //
+  // old mass values are v01_07_* and before
+  // new mass values (v01_08_* and after) are Geant4 v4.10.3 values
+  //
   double xpos = xyz.X();
   double ypos = xyz.Y();
   double zpos = xyz.Z();
@@ -525,7 +284,7 @@ int Dk2NuFlux::calcEnuWgt(bsim::Dk2Nu* decay, const TVector3& xyz,double& enu, d
         break;
 
     default:
-    std::cerr << "bsim::calcEnuWgt unknown particle type " << decay->decay.ptype
+    std::cerr << "bsim::CalculateWeight unknown particle type " << decay->decay.ptype
                 << std::endl << std::flush;
     enu    = 0.0;
     wgt_xy = 0.0;
@@ -558,8 +317,8 @@ int Dk2NuFlux::calcEnuWgt(bsim::Dk2Nu* decay, const TVector3& xyz,double& enu, d
   // Boost correction, but only if parent hasn't stopped
   if ( parentp > 0. ) {
     costh_pardet = ( decay->decay.pdpx*(xpos-decay->decay.vx) +
-                    decay->decay.pdpy*(ypos-decay->decay.vy) +
-                    decay->decay.pdpz*(zpos-decay->decay.vz) ) / ( parentp * rad);
+                     decay->decay.pdpy*(ypos-decay->decay.vy) +
+                     decay->decay.pdpz*(zpos-decay->decay.vz) ) / ( parentp * rad);
 
     if ( costh_pardet >  1.0 ) costh_pardet =  1.0;
 
@@ -673,7 +432,7 @@ int Dk2NuFlux::calcEnuWgt(bsim::Dk2Nu* decay, const TVector3& xyz,double& enu, d
         wgt_ratio = ( (3.0-2.0*xnu )  - (1.0-2.0*xnu)*costh ) / (3.0-2.0*xnu);
 
         if ( wgt_ratio < 0.0 ) {
-          std::cerr << "bsim::calcEnuWgt encountered serious problem: "
+          std::cerr << "bsim::CalculateWeight encountered serious problem: "
                     << " wgt_ratio " << wgt_ratio
                     << " enu " << enu << " costh " << costh << " xnu " << xnu
                     << " enuzr=decay->decay.necm " << enuzr << " kMUMASS " << kMUMASS

@@ -12,6 +12,7 @@ setup(){
     # according to the prescription in Mike Kirby's talk
     # minerva doc-10551, Dec 2014 (same doc can be found for other experiments)
     export LD_LIBRARY_PATH=$PPFX_DIR/lib:$PWD/lib:$LD_LIBRARY_PATH
+    export NUMIANA_DIR=${PWD}
 }
 HOST=$(hostname -f)
 echo $HOST
