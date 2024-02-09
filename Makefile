@@ -22,3 +22,7 @@ FluggDict.cxx:
 
 clean:
 	rm -rv lib/*
+	rm *Dict.cxx
+	rm *.pcm
+	rm *.so
+	rm flugg/*.so
