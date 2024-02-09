@@ -74,7 +74,6 @@ void Dk2NuFlux::CalculateFlux()
   //***************************************
 
   int treeNumber = -1;
-  int highest_evtno = 0;
   Long64_t nflux = cflux->GetEntries();
   std::cout << "Total number of entries: " << nflux << std::endl;
 
