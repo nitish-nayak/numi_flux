@@ -1,4 +1,4 @@
-This was originally a fork of Marco's original NuMIFlux [repo](https://github.com/marcodeltutto/NuMIFlux) for flugg files, combined with Krishan's [modifications](https://github.com/kvjmistry/NuMIFlux) for dk2nu files. However, it turns out that as I progressively keep making severe changes (including overhauling the code structure), this is worth detaching. All credit to them and other predecessors for the main meat of the code.
+This was originally a fork of Marco's original NuMIFlux [repo](https://github.com/marcodeltutto/NuMIFlux) for flugg files, combined with Krishan's [modifications](https://github.com/kvjmistry/NuMIFlux) for dk2nu files. However, it turns out that as I progressively keep making severe changes (including overhauling the code structure), this is worth detaching and maintaining separately. All credit to them and other predecessors for the main meat of the code.
 
 - Various simplifications mainly
 - Plan to improve some more areas to ensure easy comparisons
@@ -13,6 +13,7 @@ make all
 ```
 If you just want to work with individual `<flux_type>`s where `<flux_type>` is either `dk2nu` or `flugg`, one can do
 ```
+make base
 make <flux_type>
 ```
 To start afresh, as usual one can do
