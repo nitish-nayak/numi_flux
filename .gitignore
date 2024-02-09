@@ -4,3 +4,4 @@
 *.root
 *ACLiC*
 lib/
+*Dict.cxx

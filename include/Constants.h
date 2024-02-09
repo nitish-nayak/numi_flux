@@ -60,3 +60,5 @@ const int kgeant_omegaminus =  24;  // Geant 24
 const int kgeant_omegaplus  = 32;  // Geant 32
 
 const double kRDET = 100.0;   // set to flux per 100 cm radius
+
+#endif

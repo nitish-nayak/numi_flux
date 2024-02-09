@@ -4,8 +4,6 @@
 #include <iomanip>
 #include <string>
 
-using namespace std;
-
 #include "TChain.h"
 #include "TSystem.h"
 #include "TRandom.h"
@@ -15,48 +13,29 @@ using namespace std;
 #include "TFile.h"
 #include "TGraph.h"
 
-#include "FluggFlux.hh"
+#include "FluggFlux.h"
 
-FluggFlux::FluggFlux(string pattern) {
-
+//___________________________________________________________________________
+FluggFlux::FluggFlux(std::string pattern, std::string outfile)
+{
+  TString libs = gSystem->GetDynamicPath();
+  libs += ":";
+  libs += "/uboone/app/users/bnayak/flugg_reweight/flugg_pointing/numi_flux/flugg";
+  gSystem->SetDynamicPath(libs.Data());
   gSystem->Load("FluggTree_C.so");
 
   cflux = new TChain("h10");
   cflux->Add(pattern.c_str());
 
-  Nfiles = cflux->GetNtrees();
-  cout << "Number of files: " << Nfiles << endl;
+  Int_t nfiles = cflux->GetNtrees();
+  std::cout << "Number of files: " << nfiles << std::endl;
 
-  //Inizialise histos
-  TString titleBase1 = "Neutrino Flux;";
-  TString titleBase2 = " Energy [GeV];";
-  TString titleBase3 = " / cm^{2} / 6e20 POT";
-  // numu
-  numuFluxHisto = new TH1D("numuFluxHisto", (titleBase1 + "#nu_{#mu}" + titleBase2 +"#nu_{#mu}" + titleBase3),histNbins,histMin,histMax);
-  // anumu
-  anumuFluxHisto = new TH1D("anumuFluxHisto", (titleBase1 + "#bar{#nu}_{#mu}" + titleBase2 +"#bar{#nu}_{#mu}" + titleBase3),histNbins,histMin,histMax);
-  // nue
-  nueFluxHisto = new TH1D("nueFluxHisto", (titleBase1 + "#nu_{e}" + titleBase2 +"#nu_{e}" + titleBase3),histNbins,histMin,histMax);
-  // anue
-  anueFluxHisto = new TH1D("anueFluxHisto", (titleBase1 + "#bar{#nu}_{e}" + titleBase2 + "#bar{#nu}_{e}" + titleBase3),histNbins,histMin,histMax);
-  numuCCHisto = new TH1D("numuCCHisto", "numu CC; #nu_{#mu} Energy [GeV]; #nu_{#mu} CC / 79 ton / 6e20 POT",histNbins,histMin,histMax);
-  hPOT = new TH1D("POT", "Total POT", 1, 0, 1);
-
-  outTree = new TTree("outTree", "outTree");
-  outTree->Branch("nuE", &nuE, "nuE/F");
-  outTree->Branch("wgt", &wgt, "wgt/F");
-  outTree->Branch("ptype", &ptype, "ptype/I");
-  outTree->Branch("ntype", &ntype, "ntype/I");
-  outTree->Branch("ncascade", &ncascade, "ncascade/I");
-  outTree->Branch("pmedium", &pmedium, "pmedium/I");
-  outTree->Branch("decaytype", &decaytype, "decaytype/I");
+  fOutput = new RootOutput(outfile);
 }
 
-FluggFlux::~FluggFlux() {
-
-}
-
-void FluggFlux::CalculateFlux(string outfile) {
+//___________________________________________________________________________
+void FluggFlux::CalculateFlux()
+{
 
   fluxNtuple = new FluggTree(cflux);
 
@@ -65,21 +44,23 @@ void FluggFlux::CalculateFlux(string outfile) {
   //  Loop over the entries.
   //
   //***************************************
-
+  int treeNumber = -1;
+  int highest_evtno = 0;
   Long64_t nflux = cflux->GetEntries();
   std::cout << "Total number of entries: " << nflux << std::endl;
+
   for (Long64_t i=0; i < nflux; ++i ) {
 
     // Get entry i. fluxNtuple is now filled with entry i info.
     cflux->GetEntry(i);
 
     // Alert the user
-    if (i % 100000 == 0) cout << "On entry " << i << endl;
+    if (i % 100000 == 0) std::cout << "On entry " << i << std::endl;
     if(treeNumber != cflux->GetTreeNumber()) {
       treeNumber = cflux->GetTreeNumber();
       std::cout << "Moving to tree number " << treeNumber << "." << std::endl;
-      AccumulatedPOT += estimate_pots(highest_evtno);
-      cout << "AccumulatedPOT: " << AccumulatedPOT << endl;
+      AccumulatedPOT += EstimatePOT(highest_evtno);
+      std::cout << "AccumulatedPOT: " << AccumulatedPOT << std::endl;
     }
 
     double wgt_xy = 0.;  // neutrino weight
@@ -87,37 +68,41 @@ void FluggFlux::CalculateFlux(string outfile) {
 
     // Pick a random point in the TPC (in detector coordinates)
     TVector3 xyz_det = RandomInTPC();
-    if (debug) cout << "xyz_det = [" << xyz_det.X() << ", " << xyz_det.Y() << ", " << xyz_det.Z() << "]" << endl;
+    if (fDebug) std::cout << "xyz_det = [" << xyz_det.X() << ", " <<
+                                              xyz_det.Y() << ", " <<
+                                              xyz_det.Z() << "]" << std::endl;
 
     // From detector to beam coordinates
     TVector3 xyz_beam = FromDetToBeam(xyz_det);
-    if (debug) cout << "xyz_beam = [" << xyz_beam.X() << ", " << xyz_beam.Y() << ", " << xyz_beam.Z() << "]" << endl;
+    if (fDebug) std::cout << "xyz_beam = [" << xyz_beam.X() << ", " <<
+                                               xyz_beam.Y() << ", " <<
+                                               xyz_beam.Z() << "]" << std::endl;
 
-    // Calculate the weight
-    int ret = calcEnuWgt(fluxNtuple, xyz_beam, enu, wgt_xy);
-    if (ret != 0) cout << "Error with calcEnuWgt. Return " << ret << endl;
-    if (debug) cout << "wgt_xy " << wgt_xy << endl;
+    //  the weight
+    int ret = CalculateWeight(fluxNtuple, xyz_beam, enu, wgt_xy);
+    if (ret != 0) std::cout << "Error with CalculateWeight. Return " << ret << std::endl;
+    if (fDebug) std::cout << "wgt_xy " << wgt_xy << std::endl;
 
-    // Calculate the total weight
-    double weight = wgt_xy * fluxNtuple->Nimpwt * fDefaultWeightCorrection;
+    //  the total weight
+    double weight = wgt_xy * fluxNtuple->Nimpwt * kDefaultWeightCorrection;
 
     // Fill the histograms
     switch (fluxNtuple->Ntype) {
-      case numu:
-        numuFluxHisto->Fill(enu, weight);
-        ntype = 14;
+      case kpdg_numu:
+        fOutput->numuFluxHisto->Fill(enu, weight);
+        fOutput->ntype = kpdg_numu;
         break;
-      case anumu:
-        anumuFluxHisto->Fill(enu, weight);
-        ntype = -14;
+      case kpdg_numubar:
+        fOutput->anumuFluxHisto->Fill(enu, weight);
+        fOutput->ntype = kpdg_numubar;
         break;
-      case nue:
-        nueFluxHisto->Fill(enu, weight);
-        ntype = 12;
+      case kpdg_nue:
+        fOutput->nueFluxHisto->Fill(enu, weight);
+        fOutput->ntype = kpdg_nue;
         break;
-      case anue:
-        anueFluxHisto->Fill(enu, weight);
-        ntype = -12;
+      case kpdg_nuebar:
+        fOutput->anueFluxHisto->Fill(enu, weight);
+        fOutput->ntype = kpdg_nuebar;
         break;
     }
 
@@ -125,14 +110,14 @@ void FluggFlux::CalculateFlux(string outfile) {
     if ( fluxNtuple->evtno > highest_evtno )
       highest_evtno = fluxNtuple->evtno;
 
-    nuE = enu;
-    wgt = weight;
-    ptype = fluxNtuple->ptype;
-    ncascade = fluxNtuple->tgen;
-    pmedium = fluxNtuple->ppmedium;
-    decaytype = fluxNtuple->Ndecay;
+    fOutput->nuE = enu;
+    fOutput->wgt = weight;
+    fOutput->ptype = fluxNtuple->ptype;
+    fOutput->ncascade = fluxNtuple->tgen;
+    fOutput->pmedium = fluxNtuple->ppmedium;
+    fOutput->decaytype = fluxNtuple->Ndecay;
 
-    outTree->Fill();
+    (fOutput->outTree)->Fill();
 
   } // end of loop over the entries
 
@@ -143,173 +128,27 @@ void FluggFlux::CalculateFlux(string outfile) {
   //
   //***************************************
 
-  AccumulatedPOT += estimate_pots(highest_evtno); // To account for last tree
-  hPOT->SetBinContent(1, AccumulatedPOT);
+  AccumulatedPOT += EstimatePOT(highest_evtno); // To account for last tree
+  (fOutput->hPOT)->SetBinContent(1, AccumulatedPOT);
 
-  double scale = NominalPOT/AccumulatedPOT;
-  numuFluxHisto  -> Scale(scale);
-  anumuFluxHisto -> Scale(scale);
-  nueFluxHisto   -> Scale(scale);
-  anueFluxHisto  -> Scale(scale);
-  cout << endl << ">>> TOTAL POT: " << AccumulatedPOT << endl << endl;
-
-
-  //***************************************
-  //
-  // Apply now GENIE xsec
-  //
-  // source /nusoft/app/externals/setup
-  // setup genie_xsec R-2_8_0   -q default
-  // root -l  $GENIEXSECPATH/xsec_graphs.root
-  // >  _file0->cd("nu_mu_Ar40")
-  // >  tot_cc->Draw()
-  //
-  //***************************************
-
-  // const char* genieXsecPath = gSystem->ExpandPathName("$(GENIEXSECPATH)");
-  // if ( !genieXsecPath ) {
-  //   std::cout << "$(GENIEXSECPATH) not defined." << std::endl;
-  //   std::cout << "Please setup *genie_xsec*. (setup genie_xsec R-2_8_0   -q default)." << std::endl;
-  // }
-  //
-  // if ( genieXsecPath ) {
-  //   TString genieXsecFileName = genieXsecPath;
-  //   genieXsecFileName += "/xsec_graphs.root";
-  //   TFile *genieXsecFile = new TFile(genieXsecFileName,"READ");
-  //   genieXsecFile->cd("nu_mu_Ar40");
-  //   genieXsecNumuCC = (TGraph *) gDirectory->Get("tot_cc");
-  //   genieXsecFile->Close();
-  //
-  //   // TSpline3* genieXsecSplineNumuCC = new TSpline3("genieXsecSplineNumuCC", genieXsecNumuCC, "", 0,6);
-  //
-  //   double value;
-  //   for(int i=1; i<histNbins+1; i++) {
-  //     value = numuFluxHisto->GetBinContent(i);
-  //     value *= genieXsecNumuCC->Eval(numuFluxHisto->GetBinCenter(i)); // Eval implies linear interpolation
-  //     value *= (1e-38 * Ntarget/40.); // 1/40 is due to I'm considering nu_mu_Ar40.
-  //     numuCCHisto->SetBinContent(i,value);
-  //   }
-  // } // end if ( genieXsecPath )
+  double scale = kNominalPOT/AccumulatedPOT;
+  (fOutput->numuFluxHisto)  -> Scale(scale);
+  (fOutput->anumuFluxHisto) -> Scale(scale);
+  (fOutput->nueFluxHisto)   -> Scale(scale);
+  (fOutput->anueFluxHisto)  -> Scale(scale);
+  std::cout << std::endl << ">>> TOTAL POT: " << AccumulatedPOT << std::endl << std::endl;
 
   //***************************************
   //
   // Writing on file
   //
   //***************************************
-  TFile* f = new TFile(outfile.c_str(), "RECREATE");
-
-  f->cd();
-  numuFluxHisto  -> Write();
-  anumuFluxHisto -> Write();
-  nueFluxHisto   -> Write();
-  anueFluxHisto  -> Write();
-
-  hPOT->Write();
-  outTree->Write();
-  // if ( genieXsecPath ) {
-  //   numuCCHisto     -> Write();
-  //   genieXsecNumuCC -> Write();
-  // }
-  f->Close();
-
+  fOutput->Write();
 }
 
-
 //___________________________________________________________________________
-TVector3 FluggFlux::RandomInTPC() {
-
-    TDatime *d = new TDatime;
-    TRandom *r = new TRandom(d->GetTime());
-
-    double xTPC = 256.35;  // cm
-    double yTPC = 233.;  // cm
-    double zTPC = 1036.8; // cm
-
-    double x = r->Uniform(0., xTPC);
-    double y = r->Uniform(-yTPC/2., yTPC/2.);
-    double z = r->Uniform(0., zTPC);
-
-    TVector3 det;
-    det.SetXYZ(x,y,z);
-
-    return det;
-}
-
-
-//___________________________________________________________________________
-TVector3 FluggFlux::FromDetToBeam( const TVector3& det ) {
-
-    TVector3 beam;
-    TRotation R;
-    //corrected rotation matrix using the 0,0,0 position for MicroBooNE
-    //Previous matrix is calculated relative to MiniBooNE, which is not in the centre of the BNB!
-
-    TVector3 newX(0.92103853804025682, 0.0000462540012621546684, -0.38947144863934974);
-    TVector3 newY(0.0227135048039241207, 0.99829162468141475, 0.0538324139386641073);
-    TVector3 newZ(0.38880857519374290, -0.0584279894529063024, 0.91946400794392302);
-    //old matrix
-    /*
-    TVector3 newX(0.921228671,   0.00136256111, -0.389019125);
-    TVector3 newY(0.0226872648,  0.998103714,    0.0572211871);
-    TVector3 newZ(0.388359401,  -0.061539578,    0.919450845);
-    */
-
-    R.RotateAxes(newX,newY,newZ);
-    if (debug) {
-            cout << "R_{beam to det} = " << endl;
-            cout << " [ " << R.XX() << " " << R.XY() << " " << R.XZ() << " ] " << endl;
-            cout << " [ " << R.YX() << " " << R.YY() << " " << R.YZ() << " ] " << endl;
-            cout << " [ " << R.ZX() << " " << R.ZY() << " " << R.ZZ() << " ] " << endl;
-            cout << endl;
-    }
-    R.Invert(); // R is now the inverse
-    if (debug) {
-            cout << "R_{det to beam} = " << endl;
-            cout << " [ " << R.XX() << " " << R.XY() << " " << R.XZ() << " ] " << endl;
-            cout << " [ " << R.YX() << " " << R.YY() << " " << R.YZ() << " ] " << endl;
-            cout << " [ " << R.ZX() << " " << R.ZY() << " " << R.ZZ() << " ] " << endl;
-            cout << endl;
-    }
-    // Now R allows to go from detector to beam coordinates.
-    // NuMIDet is vector from NuMI target to uB detector (in beam coordinates)
-    // Updated position - leaving old positions here (July 2018)
-    //TVector3 NuMIDet (54.499, 74.461,  677.611); // m
-    TVector3 NuMIDet (55.02, 72.59,  672.70); //m
-    NuMIDet *= 100.; // To have NuMIDet in cm
-
-    beam = R * det + NuMIDet;
-
-    return beam;
-}
-
-
-
-//___________________________________________________________________________
-double FluggFlux::estimate_pots(int highest_potnum) {
-
-  // Stolen: https://cdcvs.fnal.gov/redmine/projects/dk2nu/repository/show/trunk/dk2nu
-  // looks like low counts are due to "evtno" not including
-  // protons that miss the actual target (hit baffle, etc)
-  // this will vary with beam conditions parameters
-  // so we should round way up, those generating flugg files
-  // aren't going to quantize less than 1000
-  // though 500 would probably be okay, 100 would not.
-  // also can't use _last_ potnum because muons decay->> don't
-  // have theirs set
-
-  // Marco: Trying with 10000
-  const Int_t    nquant = 10000; //1000; // 500;  // 100
-  const Double_t rquant = nquant;
-
-  Int_t estimate = (TMath::FloorNint((highest_potnum-1)/rquant)+1)*nquant;
-  return estimate;
-}
-
-
-
-//___________________________________________________________________________
-int FluggFlux::calcEnuWgt( FluggTree* decay, const TVector3& xyz,
-                         double& enu, double& wgt_xy)
+int FluggFlux::CalculateWeight(FluggTree* decay, const TVector3& xyz,
+                               double& enu, double& wgt_xy)
 {
 
     // Stolen: https://cdcvs.fnal.gov/redmine/projects/dk2nu/repository/show/trunk/dk2nu
@@ -357,56 +196,6 @@ int FluggFlux::calcEnuWgt( FluggTree* decay, const TVector3& xyz,
     // for now ... these masses _should_ come from TDatabasePDG
     // but use these hard-coded values to "exactly" reproduce old code
     //
-    const double kPIMASS = 0.13957;
-    const double kKMASS  = 0.49368;
-    const double kK0MASS = 0.49767;
-    const double kMUMASS = 0.105658389;
-    const double kOMEGAMASS = 1.67245;
-
-    /*
-     const int kpdg_nue       =   12;  // extended Geant 53
-     const int kpdg_nuebar    =  -12;  // extended Geant 52
-     const int kpdg_numu      =   14;  // extended Geant 56
-     const int kpdg_numubar   =  -14;  // extended Geant 55
-
-     const int kpdg_muplus     =   -13;  // Geant  5
-     const int kpdg_muminus    =    13;  // Geant  6
-     const int kpdg_pionplus   =   211;  // Geant  8
-     const int kpdg_pionminus  =  -211;  // Geant  9
-     const int kpdg_k0long     =   130;  // Geant 10  ( K0=311, K0S=310 )
-     const int kpdg_k0short    =   310;  // Geant 16
-     const int kpdg_k0mix      =   311;
-     const int kpdg_kaonplus   =   321;  // Geant 11
-     const int kpdg_kaonminus  =  -321;  // Geant 12
-     const int kpdg_omegaminus =  3334;  // Geant 24
-     const int kpdg_omegaplus  = -3334;  // Geant 32
-     */
-
-    // Marco: redefine (hopefully just for now)
-
-    const int kpdg_nue       =   53;  // extended Geant 53
-    const int kpdg_nuebar    =  52;  // extended Geant 52
-    const int kpdg_numu      =   56;  // extended Geant 56
-    const int kpdg_numubar   =  55;  // extended Geant 55
-
-    const int kpdg_muplus     =   5;  // Geant  5
-    const int kpdg_muminus    =    6;  // Geant  6
-    const int kpdg_pionplus   =   8;  // Geant  8
-    const int kpdg_pionminus  =  9;  // Geant  9
-    const int kpdg_k0long     =   10;  // Geant 10  ( K0=311, K0S=310 )
-    const int kpdg_k0short    =   16;  // Geant 16
-    const int kpdg_k0mix      =   311;
-    const int kpdg_kaonplus   =   11;  // Geant 11
-    const int kpdg_kaonminus  =  12;  // Geant 12
-    const int kpdg_omegaminus =  24;  // Geant 24
-    const int kpdg_omegaplus  = 32;  // Geant 32
-
-    // Marco: end
-
-
-
-    const double kRDET = 100.0;   // set to flux per 100 cm radius
-
     double xpos = xyz.X();
     double ypos = xyz.Y();
     double zpos = xyz.Z();
@@ -427,29 +216,29 @@ int FluggFlux::calcEnuWgt( FluggTree* decay, const TVector3& xyz,
      if ( decay->ptype == kpdg_omegaplus)  parent_mass = kOMEGAMASS;
      */
     switch ( decay->ptype ) {
-        case kpdg_pionplus:
-        case kpdg_pionminus:
+        case kgeant_pionplus:
+        case kgeant_pionminus:
             parent_mass = kPIMASS;
             break;
-        case kpdg_kaonplus:
-        case kpdg_kaonminus:
+        case kgeant_kaonplus:
+        case kgeant_kaonminus:
             parent_mass = kKMASS;
             break;
-        case kpdg_k0long:
-        case kpdg_k0short:
-        case kpdg_k0mix:
+        case kgeant_k0long:
+        case kgeant_k0short:
+        case kgeant_k0mix:
             parent_mass = kK0MASS;
             break;
-        case kpdg_muplus:
-        case kpdg_muminus:
+        case kgeant_muplus:
+        case kgeant_muminus:
             parent_mass = kMUMASS;
             break;
-        case kpdg_omegaminus:
-        case kpdg_omegaplus:
+        case kgeant_omegaminus:
+        case kgeant_omegaplus:
             parent_mass = kOMEGAMASS;
             break;
         default:
-            std::cerr << "bsim::calcEnuWgt unknown particle type " << decay->ptype
+            std::cerr << "FluggFlux::CalculateWeight unknown particle type " << decay->ptype
             << std::endl << std::flush;
             assert(0);
             return 1;
@@ -459,8 +248,8 @@ int FluggFlux::calcEnuWgt( FluggTree* decay, const TVector3& xyz,
 
 
     double parentp2 = ( decay->pdPx*decay->pdPx +
-                       decay->pdPy*decay->pdPy +
-                       decay->pdPz*decay->pdPz );
+                        decay->pdPy*decay->pdPy +
+                        decay->pdPz*decay->pdPz );
     double parent_energy = TMath::Sqrt( parentp2 +
                                        parent_mass*parent_mass);
     double parentp = TMath::Sqrt( parentp2 );
@@ -494,9 +283,6 @@ int FluggFlux::calcEnuWgt( FluggTree* decay, const TVector3& xyz,
     }
 
     enu = emrat * enuzr;  // the energy ... normally
-
-
-
 
     // Get solid angle/4pi for detector element
     // small angle approximation, fixed by Alex Radovic

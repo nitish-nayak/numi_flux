@@ -12,19 +12,19 @@
 class IFlux
 {
 public:
-  IFlux() = delete;
-  virtual ~IFlux() = delete;
+  IFlux(){};
+  virtual ~IFlux() {};
 
   TVector3 RandomInTPC() const;
   TVector3 FromDetToBeam(const TVector3& det) const;
   double EstimatePOT(int highest_potnum) const;
 
   virtual void CalculateFlux() = 0;
-  virtual int CalculateWeight() = 0;
+  int CalculateWeight() = delete;
 
   void SetDebug(){ fDebug = true; }
 
-private:
+protected:
   bool fDebug = false;
 };
 #endif
