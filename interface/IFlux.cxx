@@ -34,7 +34,7 @@ TVector3 IFlux::RandomInTPC() const
 }
 
 //___________________________________________________________________________
-TVector3 IFlux::FromDetToBeam( const TVector3& det )
+TVector3 IFlux::FromDetToBeam( const TVector3& det ) const
 {
 
   TVector3 beam;
@@ -82,8 +82,8 @@ TVector3 IFlux::FromDetToBeam( const TVector3& det )
 }
 
 //___________________________________________________________________________
-double IFlux::EstimatePOT(int highest_potnum) {
-
+double IFlux::EstimatePOT(int highest_potnum) const
+{
   // Stolen: https://cdcvs.fnal.gov/redmine/projects/dk2nu/repository/show/trunk/dk2nu
   // looks like low counts are due to "evtno" not including
   // protons that miss the actual target (hit baffle, etc)

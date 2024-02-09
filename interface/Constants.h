@@ -3,11 +3,6 @@
 
 #include "TMath.h"
 
-const int kNumu  =  14;
-const int kNumubar = -14;
-const int kNue   =  12;
-const int kNuebar  = -12;
-
 const double kNominalPOT = 6.e20;
 const double kDefaultWeightCorrection = 1./(10000. * TMath::Pi());
 const double kNTarget = 4.76e31/56.41e6 * 256.35 * 233 * 1036.8; //TPC active!!!

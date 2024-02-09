@@ -5,7 +5,7 @@
 
 #include <string>
 
-#include "TH1.h"
+#include "TH1D.h"
 #include "TTree.h"
 #include "TFile.h"
 
@@ -14,7 +14,7 @@ struct RootOutput
   RootOutput(std::string outname="flux.root");
   ~RootOutput(){
     fout->Close();
-  }
+  };
 
   void Write();
 
@@ -36,8 +36,8 @@ struct RootOutput
   TH1D* hPOT;
   TTree* outTree;
 
-  double histMin    = 0;
-  double histMax    = 20;
+  double histMin    = 0.;
+  double histMax    = 20.;
   int histNbins     = 4000;
 }
 #endif
