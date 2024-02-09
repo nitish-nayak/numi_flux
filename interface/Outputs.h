@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "TH1.h"
 #include "TTree.h"
 #include "TFile.h"
