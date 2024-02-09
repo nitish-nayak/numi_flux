@@ -21,12 +21,14 @@ flugg: FluggDict.cxx
 	$(CC) $(COPTS) dict/FluggDict.cxx flugg/FluggFlux.cc -o lib/FluggFlux_cc.so $(DEPLIBS) $(INCLUDES) -I$(NUMIANA_DIR)/flugg -L$(PWD)/lib -lnumi
 
 FluggDict.cxx:
+	if [ ! -d dict ]; then mkdir -p dict; fi
 	rootcling -f dict/$@ -c $(INCLUDES) -I$(NUMIANA_DIR)/flugg -p $(HEADERS) FluggFlux.h LinkDef.h
 
 dk2nu: Dk2NuDict.cxx
 	$(CC) $(COPTS) dict/Dk2NuDict.cxx dk2nu/Dk2NuFlux.cc -o lib/Dk2NuFlux_cc.so $(DEPLIBS) -lEG -L$(PWD)/lib -lnumi -L$(PPFX_DIR)/lib -lppfx -L${DK2NU_LIB} -ldk2nuTree $(DK2NU_INCLUDES) -I$(NUMIANA_DIR)/dk2nu
 
 Dk2NuDict.cxx:
+	if [ ! -d dict ]; then mkdir -p dict; fi
 	rootcling -f dict/$@ -c $(DK2NU_INCLUDES) -I$(NUMIANA_DIR)/dk2nu -p $(HEADERS) Dk2NuFlux.h LinkDef.h
 
 clean:
