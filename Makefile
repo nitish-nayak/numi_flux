@@ -20,7 +20,7 @@ base: $(SRCS)
 flugg: FluggDict.cxx
 	@echo -e "\033[0;36mBuilding flugg\033[0m"
 	$(CC) $(COPTS) flugg/FluggTree.C -o flugg/FluggTree_C.so $(DEPLIBS) $(INCLUDES)
-	$(CC) $(COPTS) dict/FluggDict.cxx flugg/FluggFlux.cc -o lib/FluggFlux_cc.so $(DEPLIBS) $(INCLUDES) -I$(NUMIANA_DIR)/flugg -L$(PWD)/lib -lnumi
+	$(CC) $(COPTS) dict/FluggDict.cxx flugg/FluggFlux.cc -o lib/FluggFlux_cc.so $(DEPLIBS) $(INCLUDES) -I$(NUMIANA_DIR)/flugg -L$(NUMIANA_DIR)/lib -lnumi
 
 FluggDict.cxx:
 	@echo -e "\033[0;36mMaking flugg dictionaries\033[0m"
@@ -29,7 +29,7 @@ FluggDict.cxx:
 
 dk2nu: Dk2NuDict.cxx
 	@echo -e "\033[0;36mBuilding dk2nu\033[0m"
-	$(CC) $(COPTS) dict/Dk2NuDict.cxx dk2nu/Dk2NuFlux.cc -o lib/Dk2NuFlux_cc.so $(DEPLIBS) -lEG -L$(PWD)/lib -lnumi -lppfx -L${DK2NU_LIB} -ldk2nuTree $(DK2NU_INCLUDES) -I$(NUMIANA_DIR)/dk2nu
+	$(CC) $(COPTS) dict/Dk2NuDict.cxx dk2nu/Dk2NuFlux.cc -o lib/Dk2NuFlux_cc.so $(DEPLIBS) -lEG -L$(NUMIANA_DIR)/lib -lnumi -lppfx -L${DK2NU_LIB} -ldk2nuTree $(DK2NU_INCLUDES) -I$(NUMIANA_DIR)/dk2nu
 
 Dk2NuDict.cxx:
 	@echo -e "\033[0;36mMaking dk2nu dictionaries\033[0m"
