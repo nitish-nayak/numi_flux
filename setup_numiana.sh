@@ -13,7 +13,8 @@ setup(){
     # minerva doc-10551, Dec 2014 (same doc can be found for other experiments)
     export NUMIANA_DIR=${PWD}
     export NUMIANA_INC=${NUMIANA_DIR}/include
-    export LD_LIBRARY_PATH=${NUMIANA_DIR}/lib:${NUMIANA_DIR}/dict:${PPFX_DIR}/lib:$LD_LIBRARY_PATH
+    export LD_LIBRARY_PATH=${NUMIANA_DIR}/lib:${NUMIANA_DIR}/dict:${PPFX_DIR}/lib:${PPFX_DIR}/slf7.x86_64.e17.prof/lib:$LD_LIBRARY_PATH
+    export LIBRARY_PATH=$LIBRARY_PATH:$LD_LIBRARY_PATH
 }
 HOST=$(hostname -f)
 echo $HOST

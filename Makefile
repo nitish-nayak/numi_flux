@@ -29,7 +29,7 @@ FluggDict.cxx:
 
 dk2nu: Dk2NuDict.cxx
 	@echo -e "\033[0;36mBuilding dk2nu\033[0m"
-	$(CC) $(COPTS) dict/Dk2NuDict.cxx dk2nu/Dk2NuFlux.cc -o lib/Dk2NuFlux_cc.so $(DEPLIBS) -lEG -L$(PWD)/lib -lnumi -L$(PPFX_DIR)/lib -lppfx -L${DK2NU_LIB} -ldk2nuTree $(DK2NU_INCLUDES) -I$(NUMIANA_DIR)/dk2nu
+	$(CC) $(COPTS) dict/Dk2NuDict.cxx dk2nu/Dk2NuFlux.cc -o lib/Dk2NuFlux_cc.so $(DEPLIBS) -lEG -L$(PWD)/lib -lnumi -lppfx -L${DK2NU_LIB} -ldk2nuTree $(DK2NU_INCLUDES) -I$(NUMIANA_DIR)/dk2nu
 
 Dk2NuDict.cxx:
 	@echo -e "\033[0;36mMaking dk2nu dictionaries\033[0m"
