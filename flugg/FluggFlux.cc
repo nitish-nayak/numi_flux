@@ -122,7 +122,7 @@ void FluggFlux::CalculateFlux()
     fOutput->pPz = NuMI::Pz(pvec);
     fOutput->pTheta = TMath::ACos(NuMI::CosTheta(pvec));
     // trust xF only for primary particles
-    if(fluxNtuple->Ndecay == 2)
+    if(fluxNtuple->tgen == 2)
       fOutput->pxF = NuMI::xF(gpvec, pvec);
 
     // POT stuff
