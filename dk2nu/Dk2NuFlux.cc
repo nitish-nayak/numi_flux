@@ -108,6 +108,10 @@ void Dk2NuFlux::CalculateFlux()
                                                xyz_beam.Y() << ", " <<
                                                xyz_beam.Z() << "]" << std::endl;
 
+    TVector3 nudir_unit = xyz_beam; // get the neutrino direction in beam coordinates
+    nudir_unit -= TVector3(fDk2Nu->decay.vx, fDk2Nu->decay.vy, fDk2Nu->decay.vz);
+    nudir_unit = nudir_unit.Unit();
+
     // Neutrons are not yet implemented so skip for now
     // if (fDk2Nu->decay.ptype == 2112) continue;
 
@@ -155,7 +159,44 @@ void Dk2NuFlux::CalculateFlux()
       fOutput->wgt_ppfx = 1.;
     }
 
+    // parent information
+    TLorentzVector pvec = TLorentzVector(fDk2Nu->decay.pdpx, fDk2Nu->decay.pdpy,
+                                         fDk2Nu->decay.pdpz, fDk2Nu->decay.ppenergy);
+    double inc_pbeam_mom = std::sqrt(pow(120., 2.) - pow(kPROTONMASS, 2.));
+    TLorentzVector gpvec = TLorentzVector(0., 0., inc_pbeam_mom, 120.);
+    std::vector<bsim::Ancestor> ancestors = fDk2Nu->ancestor;
+
+    fOutput->pE = NuMI::E(pvec);
+    fOutput->pPt = NuMI::Pt(pvec);
+    fOutput->pPz = NuMI::Pz(pvec);
+    fOutput->pTheta = TMath::ACos(NuMI::CosTheta(pvec));
+    // for primary particles, keep flugg calculation
+    if(fDk2Nu->tgtexit.tgen == 2)
+      fOutput->pxF = NuMI::xF(gpvec, pvec);
+    if(fDk2Nu->tgtexit.tgen > 2) {
+      unsigned int pidx = ancestors.size() - 2;
+      unsigned int gpidx = ancestors.size() - 3;
+
+      double pmass = NuMI::MassFromPdgCode(ancestors[pidx].pdg);
+      double gpmass = NuMI::MassFromPdgCode(ancestors[gpidx].pdg);
+
+      double pmom = std::sqrt(pow(ancestors[pidx].startpx, 2.) + pow(ancestors[pidx].startpy, 2.) +
+                              pow(ancestors[pidx].startpz, 2.));
+      double gpmom = std::sqrt(pow(ancestors[gpidx].startpx, 2.) + pow(ancestors[gpidx].startpy, 2.) +
+                               pow(ancestors[gpidx].startpz, 2.));
+
+      pvec = TLorentzVector(ancestors[pidx].startpx, ancestors[pidx].startpy,
+                            ancestors[pidx].startpz, std::sqrt(pow(pmom, 2.) + pow(pmass, 2.)));
+      gpvec = TLorentzVector(ancestors[gpidx].startpx, ancestors[gpidx].startpy,
+                             ancestors[gpidx].startpz, std::sqrt(pow(gpmom, 2.) + pow(gpmass, 2.)));
+      fOutput->pxF = NuMI::xF(gpvec, pvec);
+    }
+
     fOutput->nuE = enu;
+    fOutput->nudirX = nudir_unit.X();
+    fOutput->nudirY = nudir_unit.Y();
+    fOutput->nudirZ = nudir_unit.Z();
+
     fOutput->wgt = weight;
     fOutput->ptype = fDk2Nu->decay.ptype;
     fOutput->ntype = fDk2Nu->decay.ntype;
@@ -248,47 +289,8 @@ int Dk2NuFlux::CalculateWeight(bsim::Dk2Nu* decay, const TVector3& xyz,double& e
   wgt_xy = 0.0;  // but set these in case we return early due to error
   // in principle we should get these from the particle DB
   // but for consistency testing use the hardcoded values
-  double parent_mass = kPIMASS;
-  switch ( decay->decay.ptype ) {
+  double parent_mass = NuMI::MassFromPdgCode(decay->decay.ptype);
 
-    case kpdg_pionplus:
-    case kpdg_pionminus:
-        parent_mass = kPIMASS;
-        break;
-
-    case kpdg_kaonplus:
-    case kpdg_kaonminus:
-        parent_mass = kKMASS;
-        break;
-
-    case kpdg_k0long:
-    case kpdg_k0short:
-    case kpdg_k0mix:
-            parent_mass = kK0MASS;
-            break;
-
-    case kpdg_muplus:
-    case kpdg_muminus:
-        parent_mass = kMUMASS;
-        break;
-
-    case kpdg_omegaminus:
-    case kpdg_omegaplus:
-        parent_mass = kOMEGAMASS;
-        break;
-
-    case kpdg_neutron:
-    case kpdg_antineutron:
-        parent_mass = kNEUTRONMASS;
-        break;
-
-    default:
-    std::cerr << "bsim::CalculateWeight unknown particle type " << decay->decay.ptype
-                << std::endl << std::flush;
-    enu    = 0.0;
-    wgt_xy = 0.0;
-    return 1;
-  }
   double parentp2 = ( decay->decay.pdpx*decay->decay.pdpx +
                       decay->decay.pdpy*decay->decay.pdpy +
                       decay->decay.pdpz*decay->decay.pdpz );

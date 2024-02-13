@@ -11,6 +11,8 @@
 
 #include "IFlux.h"
 
+using namespace NuMI;
+
 //___________________________________________________________________________
 TVector3 IFlux::RandomInTPC() const
 {

@@ -22,6 +22,9 @@ RootOutput::RootOutput(std::string outname)
 
   outTree = new TTree("outTree", "outTree");
   outTree->Branch("nuE", &nuE, "nuE/F");
+  outTree->Branch("nudirX", &nudirX, "nudirX/F");
+  outTree->Branch("nudirY", &nudirY, "nudirY/F");
+  outTree->Branch("nudirZ", &nudirZ, "nudirZ/F");
   outTree->Branch("wgt", &wgt, "wgt/F");
   outTree->Branch("wgt_ppfx", &wgt_ppfx, "wgt_ppfx/F");
   outTree->Branch("ptype", &ptype, "ptype/I");
@@ -29,7 +32,11 @@ RootOutput::RootOutput(std::string outname)
   outTree->Branch("ncascade", &ncascade, "ncascade/I");
   outTree->Branch("pmedium", &pmedium, "pmedium/I");
   outTree->Branch("decaytype", &decaytype, "decaytype/I");
-
+  outTree->Branch("pE", &pE, "pE/F");
+  outTree->Branch("pPt", &pPt, "pPt/F");
+  outTree->Branch("pPz", &pPz, "pPz/F");
+  outTree->Branch("pTheta", &pTheta, "pTheta/F");
+  outTree->Branch("pxF", &pxF, "pxF/F");
 }
 
 //___________________________________________________________________________

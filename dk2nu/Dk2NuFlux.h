@@ -25,7 +25,7 @@ using namespace std;
 
 // Krishan: Updated this script to take in the dk2u file format instead of flugg
 
-class Dk2NuFlux: virtual private IFlux
+class Dk2NuFlux: virtual private NuMI::IFlux
 {
 public :
 

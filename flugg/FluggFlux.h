@@ -12,13 +12,14 @@
 #include "TFile.h"
 #include "TSystem.h"
 #include "TVector3.h"
+#include "TLorentzVector.h"
 
 #include "FluggTree.h"
 #include "IFlux.h"
 #include "Outputs.h"
 #include "Constants.h"
 
-class FluggFlux: virtual private IFlux
+class FluggFlux: virtual private NuMI::IFlux
 {
 public :
   FluggFlux(std::string pattern="", std::string outfile="FluggFlux.root");

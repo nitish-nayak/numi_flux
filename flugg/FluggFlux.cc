@@ -79,6 +79,10 @@ void FluggFlux::CalculateFlux()
                                                xyz_beam.Y() << ", " <<
                                                xyz_beam.Z() << "]" << std::endl;
 
+    TVector3 nudir_unit = xyz_beam; // get the neutrino direction in beam coordinates
+    nudir_unit -= TVector3(fluxNtuple->Vx, fluxNtuple->Vy, fluxNtuple->Vz);
+    nudir_unit = nudir_unit.Unit();
+
     //  the weight
     int ret = CalculateWeight(fluxNtuple, xyz_beam, enu, wgt_xy);
     if (ret != 0) std::cout << "Error with CalculateWeight. Return " << ret << std::endl;
@@ -107,11 +111,29 @@ void FluggFlux::CalculateFlux()
         break;
     }
 
+    // parent information
+    TLorentzVector pvec = TLorentzVector(fluxNtuple->pdPx, fluxNtuple->pdPy,
+                                         fluxNtuple->pdPz, fluxNtuple->ppenergy);
+    double inc_pbeam_mom = std::sqrt(pow(120., 2.) - pow(kPROTONMASS, 2.));
+    TLorentzVector gpvec = TLorentzVector(0., 0., inc_pbeam_mom, 120.);
+
+    fOutput->pE = NuMI::E(pvec);
+    fOutput->pPt = NuMI::Pt(pvec);
+    fOutput->pPz = NuMI::Pz(pvec);
+    fOutput->pTheta = TMath::ACos(NuMI::CosTheta(pvec));
+    // trust xF only for primary particles
+    if(fluxNtuple->Ndecay == 2)
+      fOutput->pxF = NuMI::xF(gpvec, pvec);
+
     // POT stuff
     if ( fluxNtuple->evtno > highest_evtno )
       highest_evtno = fluxNtuple->evtno;
 
     fOutput->nuE = enu;
+    fOutput->nudirX = nudir_unit.X();
+    fOutput->nudirY = nudir_unit.Y();
+    fOutput->nudirZ = nudir_unit.Z();
+
     fOutput->wgt = weight;
     fOutput->ptype = fluxNtuple->ptype;
     fOutput->ncascade = fluxNtuple->tgen;
@@ -207,46 +229,7 @@ int FluggFlux::CalculateWeight(FluggTree* decay, const TVector3& xyz,
 
   // in principle we should get these from the particle DB
   // but for consistency testing use the hardcoded values
-  double parent_mass = kPIMASS;
-
-  /*
-   if ( decay->ptype == kpdg_pionminus)  parent_mass = kPIMASS;
-   if ( decay->ptype == kpdg_kaonminus)  parent_mass = kKMASS;
-   if ( decay->ptype == kpdg_k0mix)      parent_mass = kK0MASS;
-   if ( decay->ptype == kpdg_muminus)    parent_mass = kMUMASS;
-   if ( decay->ptype == kpdg_omegaplus)  parent_mass = kOMEGAMASS;
-   */
-  switch ( decay->ptype ) {
-      case kgeant_pionplus:
-      case kgeant_pionminus:
-          parent_mass = kPIMASS;
-          break;
-      case kgeant_kaonplus:
-      case kgeant_kaonminus:
-          parent_mass = kKMASS;
-          break;
-      case kgeant_k0long:
-      case kgeant_k0short:
-      case kgeant_k0mix:
-          parent_mass = kK0MASS;
-          break;
-      case kgeant_muplus:
-      case kgeant_muminus:
-          parent_mass = kMUMASS;
-          break;
-      case kgeant_omegaminus:
-      case kgeant_omegaplus:
-          parent_mass = kOMEGAMASS;
-          break;
-      default:
-          std::cerr << "FluggFlux::CalculateWeight unknown particle type " << decay->ptype
-          << std::endl << std::flush;
-          assert(0);
-          return 1;
-  }
-
-
-
+  double parent_mass = NuMI::MassFromGeantCode(decay->ptype);
 
   double parentp2 = ( decay->pdPx*decay->pdPx +
                       decay->pdPy*decay->pdPy +
