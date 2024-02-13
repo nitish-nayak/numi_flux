@@ -170,7 +170,8 @@ void Dk2NuFlux::CalculateFlux()
     fOutput->pPt = NuMI::Pt(pvec);
     fOutput->pPz = NuMI::Pz(pvec);
     fOutput->pTheta = TMath::ACos(NuMI::CosTheta(pvec));
-    // for primary particles, keep flugg calculation
+    fOutput->pxF_inc = NuMI::xF(gpvec, pvec);
+    // for primary particles, keep flugg calculation (even if slightly in-accurate)
     if(fDk2Nu->tgtexit.tgen == 2)
       fOutput->pxF = NuMI::xF(gpvec, pvec);
     if(fDk2Nu->tgtexit.tgen > 2) {
