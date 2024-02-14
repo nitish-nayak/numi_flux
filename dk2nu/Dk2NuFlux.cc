@@ -171,27 +171,39 @@ void Dk2NuFlux::CalculateFlux()
     fOutput->pPz = NuMI::Pz(pvec);
     fOutput->pTheta = TMath::ACos(NuMI::CosTheta(pvec));
     fOutput->pxF_inc = NuMI::xF(gpvec, pvec);
-    // for primary particles, keep flugg calculation (even if slightly in-accurate)
-    if(fDk2Nu->tgtexit.tgen == 2)
-      fOutput->pxF = NuMI::xF(gpvec, pvec);
-    if(fDk2Nu->tgtexit.tgen > 2) {
-      unsigned int pidx = ancestors.size() - 2;
-      unsigned int gpidx = ancestors.size() - 3;
 
-      double pmass = NuMI::MassFromPdgCode(ancestors[pidx].pdg);
-      double gpmass = NuMI::MassFromPdgCode(ancestors[gpidx].pdg);
+    // outsource interaction chain to ppfx
+    InteractionChainData icd(fDk2Nu, fDkMeta);
+    int nicd = icd.interaction_chain.size();
 
-      double pmom = std::sqrt(pow(ancestors[pidx].startpx, 2.) + pow(ancestors[pidx].startpy, 2.) +
-                              pow(ancestors[pidx].startpz, 2.));
-      double gpmom = std::sqrt(pow(ancestors[gpidx].startpx, 2.) + pow(ancestors[gpidx].startpy, 2.) +
-                               pow(ancestors[gpidx].startpz, 2.));
-
-      pvec = TLorentzVector(ancestors[pidx].startpx, ancestors[pidx].startpy,
-                            ancestors[pidx].startpz, std::sqrt(pow(pmom, 2.) + pow(pmass, 2.)));
-      gpvec = TLorentzVector(ancestors[gpidx].startpx, ancestors[gpidx].startpy,
-                             ancestors[gpidx].startpz, std::sqrt(pow(gpmom, 2.) + pow(gpmass, 2.)));
-      fOutput->pxF = NuMI::xF(gpvec, pvec);
+    if(nicd >= 2) {
+      double ScPt = icd.interaction_chain[nicd-2].Pt;
+      double ScPz = icd.interaction_chain[nicd-2].Pz;
+      fOutput->pScTheta = TMath::ACos(ScPz/std::sqrt(pow(ScPt, 2.) + pow(ScPz, 2.)));
+      fOutput->pxF = icd.interaction_chain[nicd-2].xF;
     }
+
+    // // for primary particles, keep flugg calculation (even if slightly in-accurate)
+    // if(fDk2Nu->tgtexit.tgen == 2)
+    //   fOutput->pxF = NuMI::xF(gpvec, pvec);
+    // if(fDk2Nu->tgtexit.tgen > 2) {
+    //   unsigned int pidx = ancestors.size() - 2;
+    //   unsigned int gpidx = ancestors.size() - 3;
+    //
+    //   double pmass = NuMI::MassFromPdgCode(ancestors[pidx].pdg);
+    //   double gpmass = NuMI::MassFromPdgCode(ancestors[gpidx].pdg);
+    //
+    //   double pmom = std::sqrt(pow(ancestors[pidx].startpx, 2.) + pow(ancestors[pidx].startpy, 2.) +
+    //                           pow(ancestors[pidx].startpz, 2.));
+    //   double gpmom = std::sqrt(pow(ancestors[gpidx].startpx, 2.) + pow(ancestors[gpidx].startpy, 2.) +
+    //                            pow(ancestors[gpidx].startpz, 2.));
+    //
+    //   pvec = TLorentzVector(ancestors[pidx].startpx, ancestors[pidx].startpy,
+    //                         ancestors[pidx].startpz, std::sqrt(pow(pmom, 2.) + pow(pmass, 2.)));
+    //   gpvec = TLorentzVector(ancestors[gpidx].startpx, ancestors[gpidx].startpy,
+    //                          ancestors[gpidx].startpz, std::sqrt(pow(gpmom, 2.) + pow(gpmass, 2.)));
+    //   fOutput->pxF = NuMI::xF(gpvec, pvec);
+    // }
 
     fOutput->nuE = enu;
     fOutput->nudirX = nudir_unit.X();

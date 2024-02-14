@@ -35,6 +35,7 @@ struct RootOutput
   Float_t pPt       = -5.;          // parent pT in lab frame
   Float_t pPz       = -5.;          // parent pZ in lab frame
   Float_t pTheta    = -5.;          // parent angle (in radians) wrt beamline (z-axis)
+  Float_t pScTheta  = -5.;          // parent scattering angle (in radians) wrt its ancestor direction
   Float_t pxF       = -5.;          // parent Feynman-x, only available for primary in flugg, dk2nu has for any parent
   Float_t pxF_inc   = -5.;          // parent Feynman-x, assuming incident particle is 120 GeV proton beam
 
