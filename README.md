@@ -25,6 +25,17 @@ make clean
 - `flugg` just needs `root` basically
 - `dk2nu` pulls in additionally `ppfx`, `boost`, `dk2nu`
 
+### File Locations
+- `flugg` : originally available on bluearc
+    - FHC : `/nusoft/data/flux/blackbird-numix/flugg_mn000z200i_rp11_lowth_pnut_f11f093bbird_target/root`
+    - RHC : `/nusoft/data/flux/blackbird-numix/flugg_mn000z-200i_rp11_lowth_pnut_f11f093bbird_target/root`
+    - Also copied to `/uboone/data/users/bnayak/ppfx/flugg_studies/flugg_files` and `/pnfs/uboone/persistent/users/bnayak/flux_files/flugg_files` (dcache)
+    - See [wiki](https://cdcvs.fnal.gov/redmine/projects/numi-beam-sim/wiki/Locations_of_shared_files) for more information
+
+- `dk2nu` : available on stashcache
+    - FHC : `/cvmfs/uboone.osgstorage.org/stash/uboonebeam/numi_dk2nu_zero_threshold/FHC`
+    - RHC : `/cvmfs/uboone.osgstorage.org/stash/uboonebeam/numi_dk2nu_zero_threshold/RHC`
+
 ## Planned Changes
 
 - ~Common output interface, currently its replicated across both `<flux_type>` classes~
