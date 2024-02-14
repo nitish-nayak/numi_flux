@@ -7,8 +7,9 @@ This was originally a fork of Marco's original NuMIFlux [repo](https://github.co
 
 ## Instructions
 
+After setting up `uboonecode` or optionally only the dependencies (see below)
 ```
-source setup_uboone.sh
+source setup_numiana.sh
 make all
 ```
 If you just want to work with individual `<flux_type>`s where `<flux_type>` is either `dk2nu` or `flugg`, one can do
