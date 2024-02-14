@@ -26,6 +26,7 @@ using namespace std;
 #include "TH1.h"
 #include "TFile.h"
 #include "TGraph.h"
+#include "TString.h"
 #include <TParticlePDG.h>
 #include <TDatabasePDG.h>
 
@@ -177,10 +178,23 @@ void Dk2NuFlux::CalculateFlux()
     int nicd = icd.interaction_chain.size();
 
     if(nicd >= 2) {
-      double ScPt = icd.interaction_chain[nicd-2].Pt;
-      double ScPz = icd.interaction_chain[nicd-2].Pz;
+
+      const InteractionData id = icd.interaction_chain[nicd-2];
+      double ScPt = id.Pt;
+      double ScPz = id.Pz;
       fOutput->pScTheta = TMath::ACos(ScPz/std::sqrt(pow(ScPt, 2.) + pow(ScPz, 2.)));
-      fOutput->pxF = icd.interaction_chain[nicd-2].xF;
+      fOutput->pxF = id.xF;
+
+      gpvec = TLorentzVector(id.Inc_P4[0], id.Inc_P4[1], id.Inc_P4[2], id.Inc_P4[3]);
+      fOutput->gpE = NuMI::E(gpvec);
+      fOutput->gpPt = NuMI::Pt(gpvec);
+      fOutput->gpPz = NuMI::Pz(gpvec);
+      fOutput->gpTheta = TMath::ACos(NuMI::CosTheta(gpvec));
+
+      fOutput->pProc = id.Proc;
+      fOutput->pvx   = id.Vtx[0];
+      fOutput->pvy   = id.Vtx[1];
+      fOutput->pvz   = id.Vtx[2];
     }
 
     // // for primary particles, keep flugg calculation (even if slightly in-accurate)

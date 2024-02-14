@@ -39,6 +39,14 @@ RootOutput::RootOutput(std::string outname)
   outTree->Branch("pScTheta", &pScTheta, "pScTheta/F");
   outTree->Branch("pxF", &pxF, "pxF/F");
   outTree->Branch("pxF_inc", &pxF_inc, "pxF_inc/F");
+  outTree->Branch("pvx", &pvx, "pvx/F");
+  outTree->Branch("pvy", &pvy, "pvy/F");
+  outTree->Branch("pvz", &pvz, "pvz/F");
+  outTree->Branch("gpE", &gpE, "gpE/F");
+  outTree->Branch("gpPt", &gpPt, "gpPt/F");
+  outTree->Branch("gpPz", &gpPz, "gpPz/F");
+  outTree->Branch("gpTheta", &gpTheta, "gpTheta/F");
+  outTree->Branch("pProc", &pProc);
 }
 
 //___________________________________________________________________________

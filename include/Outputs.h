@@ -38,6 +38,15 @@ struct RootOutput
   Float_t pScTheta  = -5.;          // parent scattering angle (in radians) wrt its ancestor direction
   Float_t pxF       = -5.;          // parent Feynman-x, only available for primary in flugg, dk2nu has for any parent
   Float_t pxF_inc   = -5.;          // parent Feynman-x, assuming incident particle is 120 GeV proton beam
+  Float_t pvx       = -5.;          // parent production point x (cm)
+  Float_t pvy       = -5.;          // parent production point y (cm)
+  Float_t pvz       = -5.;          // parent production point z (cm)
+  Float_t gpE       = -5.;          // grandparent energy in lab frame
+  Float_t gpPt      = -5.;          // grandparent pT in lab frame
+  Float_t gpPz      = -5.;          // grandparent pZ in lab frame
+  Float_t gpTheta   = -5.;          // grandparent angle (in radians) wrt beamline (z-axis)
+
+  std::string pProc = "NotFilled";            // parent process name
 
   TFile* fout;
 
