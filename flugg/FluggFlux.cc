@@ -112,8 +112,8 @@ void FluggFlux::CalculateFlux()
     }
 
     // parent information
-    TLorentzVector pvec = TLorentzVector(fluxNtuple->pdPx, fluxNtuple->pdPy,
-                                         fluxNtuple->pdPz, fluxNtuple->ppenergy);
+    TLorentzVector pvec = TLorentzVector((fluxNtuple->ppdxdz)*(fluxNtuple->pppz), (fluxNtuple->ppdydz)*(fluxNtuple->pppz),
+                                         fluxNtuple->pppz, fluxNtuple->ppenergy);
     double inc_pbeam_mom = std::sqrt(pow(120., 2.) - pow(kPROTONMASS, 2.));
     TLorentzVector gpvec = TLorentzVector(0., 0., inc_pbeam_mom, 120.);
 
@@ -122,6 +122,9 @@ void FluggFlux::CalculateFlux()
     fOutput->pPz = NuMI::Pz(pvec);
     fOutput->pTheta = TMath::ACos(NuMI::CosTheta(pvec));
     fOutput->pxF_inc = NuMI::xF(gpvec, pvec);
+    fOutput->pvx = fluxNtuple->ppvx;
+    fOutput->pvy = fluxNtuple->ppvy;
+    fOutput->pvz = fluxNtuple->ppvz;
     // trust xF only for primary particles
     if(fluxNtuple->tgen == 2)
       fOutput->pxF = NuMI::xF(gpvec, pvec);

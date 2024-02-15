@@ -161,8 +161,8 @@ void Dk2NuFlux::CalculateFlux()
     }
 
     // parent information
-    TLorentzVector pvec = TLorentzVector(fDk2Nu->decay.pdpx, fDk2Nu->decay.pdpy,
-                                         fDk2Nu->decay.pdpz, fDk2Nu->decay.ppenergy);
+    TLorentzVector pvec = TLorentzVector((fDk2Nu->decay.ppdxdz)*(fDk2Nu->decay.pppz), (fDk2Nu->decay.ppdydz)*(fDk2Nu->decay.pppz),
+                                          fDk2Nu->decay.pppz, fDk2Nu->decay.ppenergy);
     double inc_pbeam_mom = std::sqrt(pow(120., 2.) - pow(kPROTONMASS, 2.));
     TLorentzVector gpvec = TLorentzVector(0., 0., inc_pbeam_mom, 120.);
     std::vector<bsim::Ancestor> ancestors = fDk2Nu->ancestor;
