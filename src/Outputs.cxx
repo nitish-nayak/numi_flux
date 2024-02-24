@@ -25,6 +25,7 @@ RootOutput::RootOutput(std::string outname)
   outTree->Branch("nudirX", &nudirX, "nudirX/F");
   outTree->Branch("nudirY", &nudirY, "nudirY/F");
   outTree->Branch("nudirZ", &nudirZ, "nudirZ/F");
+  outTree->Branch("nuL", &nuL, "nuL/F");
   outTree->Branch("wgt", &wgt, "wgt/F");
   outTree->Branch("wgt_ppfx", &wgt_ppfx, "wgt_ppfx/F");
   outTree->Branch("ptype", &ptype, "ptype/I");
@@ -47,6 +48,9 @@ RootOutput::RootOutput(std::string outname)
   outTree->Branch("gpPz", &gpPz, "gpPz/F");
   outTree->Branch("gpTheta", &gpTheta, "gpTheta/F");
   outTree->Branch("pProc", &pProc);
+  outTree->Branch("nvx", &nvx, "nvx/F");
+  outTree->Branch("nvy", &nvy, "nvy/F");
+  outTree->Branch("nvz", &nvz, "nvz/F");
 }
 
 //___________________________________________________________________________

@@ -111,6 +111,8 @@ void Dk2NuFlux::CalculateFlux()
 
     TVector3 nudir_unit = xyz_beam; // get the neutrino direction in beam coordinates
     nudir_unit -= TVector3(fDk2Nu->decay.vx, fDk2Nu->decay.vy, fDk2Nu->decay.vz);
+    fOutput->nuL = nudir_unit.Mag();
+
     nudir_unit = nudir_unit.Unit();
 
     // Neutrons are not yet implemented so skip for now
@@ -224,6 +226,9 @@ void Dk2NuFlux::CalculateFlux()
     fOutput->nudirY = nudir_unit.Y();
     fOutput->nudirZ = nudir_unit.Z();
 
+    fOutput->nvx = fDk2Nu->decay.vx;
+    fOutput->nvy = fDk2Nu->decay.vy;
+    fOutput->nvz = fDk2Nu->decay.vz;
     fOutput->wgt = weight;
     fOutput->ptype = fDk2Nu->decay.ptype;
     fOutput->ntype = fDk2Nu->decay.ntype;

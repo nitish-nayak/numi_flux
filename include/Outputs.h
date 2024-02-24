@@ -22,6 +22,7 @@ struct RootOutput
   Float_t nudirX    = -5.;          // neutrino X direction
   Float_t nudirY    = -5.;          // neutrino Y direction
   Float_t nudirZ    = -5.;          // neutrino Z direction
+  Float_t nuL       = -5.;          // neutrino propagation length
 
   Float_t wgt       = 1.;           // weight at location, includes correction for muon polarization
   Float_t wgt_ppfx  = 1.;           // ppfx CV weight when available (only for dk2nu)
@@ -45,6 +46,9 @@ struct RootOutput
   Float_t gpPt      = -5.;          // grandparent pT in lab frame
   Float_t gpPz      = -5.;          // grandparent pZ in lab frame
   Float_t gpTheta   = -5.;          // grandparent angle (in radians) wrt beamline (z-axis)
+  Float_t nvx       = -5.;          // neutrino production point x (cm)
+  Float_t nvy       = -5.;          // neutrino production point y (cm)
+  Float_t nvz       = -5.;          // neutrino production point z (cm)
 
   std::string pProc = "NotFilled";            // parent process name
 

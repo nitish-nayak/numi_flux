@@ -81,6 +81,8 @@ void FluggFlux::CalculateFlux()
 
     TVector3 nudir_unit = xyz_beam; // get the neutrino direction in beam coordinates
     nudir_unit -= TVector3(fluxNtuple->Vx, fluxNtuple->Vy, fluxNtuple->Vz);
+    fOutput->nuL = nudir_unit.Mag();
+
     nudir_unit = nudir_unit.Unit();
 
     //  the weight
@@ -138,6 +140,9 @@ void FluggFlux::CalculateFlux()
     fOutput->nudirY = nudir_unit.Y();
     fOutput->nudirZ = nudir_unit.Z();
 
+    fOutput->nvx = fluxNtuple->Vx;
+    fOutput->nvy = fluxNtuple->Vy;
+    fOutput->nvz = fluxNtuple->Vz;
     fOutput->wgt = weight;
     fOutput->ptype = fluxNtuple->ptype;
     fOutput->ncascade = fluxNtuple->tgen;
