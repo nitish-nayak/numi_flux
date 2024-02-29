@@ -156,7 +156,16 @@ void Dk2NuFlux::CalculateFlux()
     // get ppfx weights
     try {
       fPPFXrw->calculateWeights(fDk2Nu, fDkMeta);
-      fOutput->wgt_ppfx = fPPFXrw->GetCVWeight();
+      fOutput->wgt_ppfx =        fPPFXrw->GetCVWeight();
+      fOutput->wgt_tgtatt =      (fPPFXrw->cv_rw)->att_wgt;
+      fOutput->wgt_absorp =      (fPPFXrw->cv_rw)->tot_abs_wgt;
+      fOutput->wgt_ttpcpion =    (fPPFXrw->cv_rw)->pC_pi_wgt;
+      fOutput->wgt_ttpckaon =    (fPPFXrw->cv_rw)->pC_k_wgt;
+      fOutput->wgt_ttpcnucleon = (fPPFXrw->cv_rw)->pC_nu_wgt;
+      fOutput->wgt_ttncpion =    (fPPFXrw->cv_rw)->nC_pi_wgt;
+      fOutput->wgt_ttnucleona =  (fPPFXrw->cv_rw)->nuA_wgt;
+      fOutput->wgt_ttmesoninc =  (fPPFXrw->cv_rw)->meson_inc_wgt;
+      fOutput->wgt_others =      (fPPFXrw->cv_rw)->other_wgt;
     } catch (...) {
       std::cout<<"Failed to calculate wgt"<<std::endl;
       fOutput->wgt_ppfx = 1.;

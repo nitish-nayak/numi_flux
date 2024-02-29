@@ -28,6 +28,16 @@ RootOutput::RootOutput(std::string outname)
   outTree->Branch("nuL", &nuL, "nuL/F");
   outTree->Branch("wgt", &wgt, "wgt/F");
   outTree->Branch("wgt_ppfx", &wgt_ppfx, "wgt_ppfx/F");
+  outTree->Branch("wgt_tgtatt", &wgt_tgtatt, "wgt_tgtatt/F");
+  outTree->Branch("wgt_absorp", &wgt_absorp, "wgt_absorp/F");
+  outTree->Branch("wgt_ttpcpion", &wgt_ttpcpion, "wgt_ttpcpion/F");
+  outTree->Branch("wgt_ttpckaon", &wgt_ttpckaon, "wgt_ttpckaon/F");
+  outTree->Branch("wgt_ttpcnucleon", &wgt_ttpcnucleon, "wgt_ttpcnucleon/F");
+  outTree->Branch("wgt_ttncpion", &wgt_ttncpion, "wgt_ttncpion/F");
+  outTree->Branch("wgt_ttnucleona", &wgt_ttnucleona, "wgt_ttnucleona/F");
+  outTree->Branch("wgt_ttmesoninc", &wgt_ttmesoninc, "wgt_ttmesoninc/F");
+  outTree->Branch("wgt_others", &wgt_others, "wgt_others/F");
+
   outTree->Branch("ptype", &ptype, "ptype/I");
   outTree->Branch("ntype", &ntype, "ntype/I");
   outTree->Branch("ncascade", &ncascade, "ncascade/I");

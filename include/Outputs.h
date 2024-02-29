@@ -26,6 +26,17 @@ struct RootOutput
 
   Float_t wgt       = 1.;           // weight at location, includes correction for muon polarization
   Float_t wgt_ppfx  = 1.;           // ppfx CV weight when available (only for dk2nu)
+  // breakdowns of ppfx weights
+  Float_t wgt_tgtatt = 1.;
+  Float_t wgt_absorp = 1.;
+  Float_t wgt_ttpcpion = 1.;
+  Float_t wgt_ttpckaon = 1.;
+  Float_t wgt_ttpcnucleon = 1.;
+  Float_t wgt_ttncpion = 1.;
+  Float_t wgt_ttnucleona = 1.;
+  Float_t wgt_ttmesoninc = 1.;
+  Float_t wgt_others = 1.;
+
   Int_t ptype       = -1000;        // parent particle code. uses GEANT codes for flugg, PDG for dk2nu
   Int_t ncascade    = -1;           // number of interactions before neutrino, 2 = primary, etc
   Int_t ntype       = -1000;        // neutrino pdg code
