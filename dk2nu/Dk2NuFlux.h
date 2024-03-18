@@ -30,6 +30,7 @@ class Dk2NuFlux: virtual private NuMI::IFlux
 public :
 
   Dk2NuFlux(std::string pattern="", std::string outfile="Dk2NuFlux.root");
+  Dk2NuFlux(bool isfilelist, std::string filelist, std::string outfile="Dk2NuFlux.root");
   ~Dk2NuFlux() override {};
 
   void CalculateFlux() override;

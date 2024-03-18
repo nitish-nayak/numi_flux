@@ -1,6 +1,7 @@
 #define FluggFlux_cxx
 
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 #include <string>
 #include <stdlib.h>
@@ -27,6 +28,35 @@ FluggFlux::FluggFlux(std::string pattern, std::string outfile)
 
   cflux = new TChain("h10");
   cflux->Add(pattern.c_str());
+
+  Int_t nfiles = cflux->GetNtrees();
+  std::cout << "Number of files: " << nfiles << std::endl;
+
+  fOutput = new RootOutput(outfile);
+}
+
+//___________________________________________________________________________
+FluggFlux::FluggFlux(bool isfilelist, std::string filelist, std::string outfile)
+{
+  if (!isfilelist){
+    std::cerr << "Require input isfilelist argument to be true" << std::endl;
+    std::exit(1);
+  }
+  TString libs = gSystem->GetDynamicPath();
+  libs += ":";
+  libs += std::string(std::getenv("NUMIANA_DIR"))+"/flugg";
+  gSystem->SetDynamicPath(libs.Data());
+  gSystem->Load("FluggTree_C.so");
+
+  cflux = new TChain("h10");
+  std::ifstream f_stream;
+  f_stream.open(filelist.c_str());
+  std::string f_line;
+  while (f_stream.good()) {
+    std::getline(f_stream, f_line);
+    if(f_line.find(".root") > 100000) continue;
+    cflux->Add(f_line.c_str());
+  }
 
   Int_t nfiles = cflux->GetNtrees();
   std::cout << "Number of files: " << nfiles << std::endl;

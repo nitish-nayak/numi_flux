@@ -13,6 +13,7 @@ using namespace NeutrinoFluxReweight;
 #include <cstddef>
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <stdlib.h>
 #include <iomanip>
 
@@ -40,6 +41,32 @@ Dk2NuFlux::Dk2NuFlux(std::string pattern, std::string outfile)
 
   cflux_meta = new TChain("dkmetaTree");
   cflux_meta->Add(pattern.c_str());
+
+  Int_t nfiles = cflux->GetNtrees();
+  std::cout << "Number of files: " << nfiles << std::endl;
+
+  fOutput = new RootOutput(outfile);
+}
+
+//___________________________________________________________________________
+Dk2NuFlux::Dk2NuFlux(bool isfilelist, std::string filelist, std::string outfile)
+{
+  cflux = new TChain("dk2nuTree");
+  cflux_meta = new TChain("dkmetaTree");
+
+  if (!isfilelist){
+    std::cerr << "Require input isfilelist argument to be true" << std::endl;
+    std::exit(1);
+  }
+  std::ifstream f_stream;
+  f_stream.open(filelist.c_str());
+  std::string f_line;
+  while (f_stream.good()) {
+    std::getline(f_stream, f_line);
+    if(f_line.find(".root") > 100000) continue;
+    cflux->Add(f_line.c_str());
+    cflux_meta->Add(f_line.c_str());
+  }
 
   Int_t nfiles = cflux->GetNtrees();
   std::cout << "Number of files: " << nfiles << std::endl;

@@ -23,6 +23,7 @@ class FluggFlux: virtual private NuMI::IFlux
 {
 public :
   FluggFlux(std::string pattern="", std::string outfile="FluggFlux.root");
+  FluggFlux(bool isfilelist, std::string filelist, std::string outfile="FluggFlux.root");
   ~FluggFlux() override {};
 
   void CalculateFlux() override;
