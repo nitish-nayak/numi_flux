@@ -52,10 +52,8 @@ void Dk2NuFlux::CalculateFlux()
 {
   // initialize ppfx
   MakeReweight* fPPFXrw = MakeReweight::getInstance();
-  std::string fPPFXMode = "ubnumi_cvonly";
   gSystem->Setenv("MODE", fPPFXMode.c_str());
-  Int_t fSeed = 84;
-  fPPFXrw->setBaseSeed(fSeed); // used in EventWeight ubsim, shouldn't matter for CV
+  fPPFXrw->setBaseSeed(fSeed);
   std::string inputOptions = std::string(std::getenv("NUMIANA_DIR"))+"/dk2nu/ppfx/inputs_"+fPPFXMode+".xml";
   if(!(fPPFXrw->AlreadyInitialized())){
     fPPFXrw->SetOptions(inputOptions);
@@ -166,6 +164,11 @@ void Dk2NuFlux::CalculateFlux()
       fOutput->wgt_ttnucleona =  (fPPFXrw->cv_rw)->nuA_wgt;
       fOutput->wgt_ttmesoninc =  (fPPFXrw->cv_rw)->meson_inc_wgt;
       fOutput->wgt_others =      (fPPFXrw->cv_rw)->other_wgt;
+      if(fPPFXrw->GetNumberOfUniversesUsed() > 0){
+        std::vector<double> tmp_univ_wgts = fPPFXrw->GetTotalWeights();
+        std::vector<float> univ_wgts(tmp_univ_wgts.begin(), tmp_univ_wgts.end());
+        fOutput->wgt_ppfxunivs = univ_wgts;
+      }
     } catch (...) {
       std::cout<<"Failed to calculate wgt"<<std::endl;
       fOutput->wgt_ppfx = 1.;

@@ -4,6 +4,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "TH1D.h"
 #include "TTree.h"
@@ -36,6 +37,9 @@ struct RootOutput
   Float_t wgt_ttnucleona = 1.;
   Float_t wgt_ttmesoninc = 1.;
   Float_t wgt_others = 1.;
+
+  // get ppfx multiverse weights as well
+  std::vector<Float_t> wgt_ppfxunivs;
 
   Int_t ptype       = -1000;        // parent particle code. uses GEANT codes for flugg, PDG for dk2nu
   Int_t ncascade    = -1;           // number of interactions before neutrino, 2 = primary, etc
