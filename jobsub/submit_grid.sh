@@ -41,7 +41,7 @@ echo "Number of Jobs : "$NJOBS
 echo "Input pnfs file path : "$FILEPATH
 echo "Job Output directory : "$OUTDIR
 
-TARDIR="/pnfs/"${EXPERIMENT}"/scratch/users/"${USER}"/grid_cache/numiana"
+TARDIR="/pnfs/"${EXPERIMENT}"/scratch/users/"${USER}"/grid_cache/numiana/"${RANDOM}
 if [ ! -d "${TARDIR}" ]; then
     mkdir -p "${TARDIR}"
 fi
