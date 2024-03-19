@@ -47,18 +47,22 @@ if [ ! -d "${TARDIR}" ]; then
 fi
 
 cd "${NUMIANA_DIR}"
-echo "Tarring up numi_flux repo"
-tar -czf "${TARDIR}"/local_numiflux.tar.gz .
+if [ ! -f "${TARDIR}"/local_numiflux.tar.gz ]; then
+    echo "Tarring up numi_flux repo"
+    tar -czf "${TARDIR}"/local_numiflux.tar.gz .
+fi
 
 if [ "$local_ppfx" = true ]; then
     if [[ -z "${PPFX_DIR}" ]]; then
         echo "PPFX_DIR is not set but requested local ppfx. Exiting!"
         exit 1
     fi
-    echo "Tarring up local ppfx"
-    cd "${PPFX_DIR}"
-    tar -czf "${TARDIR}"/local_ppfx.tar.gz .
-    cd "${NUMIANA_DIR}"
+    if [ ! -f "${TARDIR}"/local_ppfx.tar.gz ]; then
+        echo "Tarring up local ppfx"
+        cd "${PPFX_DIR}"
+        tar -czf "${TARDIR}"/local_ppfx.tar.gz .
+        cd "${NUMIANA_DIR}"
+    fi
 fi
 
 MACRO="jobsub/run_ppfxunivs.py"
