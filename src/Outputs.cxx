@@ -37,6 +37,7 @@ RootOutput::RootOutput(std::string outname)
   outTree->Branch("wgt_ttnucleona", &wgt_ttnucleona, "wgt_ttnucleona/F");
   outTree->Branch("wgt_ttmesoninc", &wgt_ttmesoninc, "wgt_ttmesoninc/F");
   outTree->Branch("wgt_others", &wgt_others, "wgt_others/F");
+  outTree->Branch("wgt_ppfxunivs", &wgt_ppfxunivs);
 
   outTree->Branch("ptype", &ptype, "ptype/I");
   outTree->Branch("ntype", &ntype, "ntype/I");

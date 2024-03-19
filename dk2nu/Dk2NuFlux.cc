@@ -13,6 +13,7 @@ using namespace NeutrinoFluxReweight;
 #include <cstddef>
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <stdlib.h>
 #include <iomanip>
 
@@ -48,14 +49,38 @@ Dk2NuFlux::Dk2NuFlux(std::string pattern, std::string outfile)
 }
 
 //___________________________________________________________________________
+Dk2NuFlux::Dk2NuFlux(bool isfilelist, std::string filelist, std::string outfile)
+{
+  cflux = new TChain("dk2nuTree");
+  cflux_meta = new TChain("dkmetaTree");
+
+  if (!isfilelist){
+    std::cerr << "Require input isfilelist argument to be true" << std::endl;
+    std::exit(1);
+  }
+  std::ifstream f_stream;
+  f_stream.open(filelist.c_str());
+  std::string f_line;
+  while (f_stream.good()) {
+    std::getline(f_stream, f_line);
+    if(f_line.find(".root") > 100000) continue;
+    cflux->Add(f_line.c_str());
+    cflux_meta->Add(f_line.c_str());
+  }
+
+  Int_t nfiles = cflux->GetNtrees();
+  std::cout << "Number of files: " << nfiles << std::endl;
+
+  fOutput = new RootOutput(outfile);
+}
+
+//___________________________________________________________________________
 void Dk2NuFlux::CalculateFlux()
 {
   // initialize ppfx
   MakeReweight* fPPFXrw = MakeReweight::getInstance();
-  std::string fPPFXMode = "ubnumi_cvonly";
   gSystem->Setenv("MODE", fPPFXMode.c_str());
-  Int_t fSeed = 84;
-  fPPFXrw->setBaseSeed(fSeed); // used in EventWeight ubsim, shouldn't matter for CV
+  fPPFXrw->setBaseSeed(fSeed);
   std::string inputOptions = std::string(std::getenv("NUMIANA_DIR"))+"/dk2nu/ppfx/inputs_"+fPPFXMode+".xml";
   if(!(fPPFXrw->AlreadyInitialized())){
     fPPFXrw->SetOptions(inputOptions);
@@ -166,6 +191,11 @@ void Dk2NuFlux::CalculateFlux()
       fOutput->wgt_ttnucleona =  (fPPFXrw->cv_rw)->nuA_wgt;
       fOutput->wgt_ttmesoninc =  (fPPFXrw->cv_rw)->meson_inc_wgt;
       fOutput->wgt_others =      (fPPFXrw->cv_rw)->other_wgt;
+      if(fPPFXrw->GetNumberOfUniversesUsed() > 0){
+        std::vector<double> tmp_univ_wgts = fPPFXrw->GetTotalWeights();
+        std::vector<float> univ_wgts(tmp_univ_wgts.begin(), tmp_univ_wgts.end());
+        fOutput->wgt_ppfxunivs = univ_wgts;
+      }
     } catch (...) {
       std::cout<<"Failed to calculate wgt"<<std::endl;
       fOutput->wgt_ppfx = 1.;

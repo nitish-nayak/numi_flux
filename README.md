@@ -33,13 +33,23 @@ make clean
     - Also copied to `/uboone/data/users/bnayak/ppfx/flugg_studies/flugg_files` and `/pnfs/uboone/persistent/users/bnayak/flux_files/flugg_files` (dcache)
     - See [wiki](https://cdcvs.fnal.gov/redmine/projects/numi-beam-sim/wiki/Locations_of_shared_files) for more information
 
-- `dk2nu` : available on stashcache
-    - FHC : `/cvmfs/uboone.osgstorage.org/stash/uboonebeam/numi_dk2nu_zero_threshold/FHC`
-    - RHC : `/cvmfs/uboone.osgstorage.org/stash/uboonebeam/numi_dk2nu_zero_threshold/RHC`
+- `dk2nu` :
+    - old (bugged) : `/cvmfs/uboone.osgstorage.org/stash/uboonebeam/numi_dk2nu_zero_threshold`
+    - new (various bugfixed) : `/pnfs/uboone/persistent/users/bnayak/flux_files`
 
-## Planned Changes
+### Job Submission
+- Usage for `jobsub/submit_grid.sh`. Arguments
+    - `-p` : tar and ship local ppfx installation (`$PPFX_DIR` must be set and pointing to local ppfx installation)
+    - `-s` : set seed for PPFX universes, pulls PPFX config from `dk2nu/ppfx/inputs_ubnumi_multisim.xml`
+        - multisim xml file runs 100 universes currently, modify to run your own set
+    - `-n` : number of jobs to run
+    - `-i` : folder containing input `dk2nu` files. The submission takes the first `n` files and runs `1` file per job
+    - `-o` : job output directory
+- Runs `jobsub/numiana_job.sh` on the grid which in turn runs the python macro `jobsub/run_ppfxunivs.py`
+
+### Planned Changes
 
 - ~Common output interface, currently its replicated across both `<flux_type>` classes~
 - Parallel Processing
     - Atleast for FLUGG, this should be easy
-    - Can do for Dk2Nu as well but PPFX has a bunch of static instances that is likely not thread safe
+    - ~Can do for Dk2Nu as well but PPFX has a bunch of static instances that is likely not thread safe~ (just submit jobs lol..)
