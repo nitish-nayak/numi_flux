@@ -52,5 +52,7 @@ make clean
 
 - ~Common output interface, currently its replicated across both `<flux_type>` classes~
 - Parallel Processing
-    - ~Atleast for FLUGG, this should be easy~ Check `example/flugg_parallel.sh -h`
-    - ~Can do for Dk2Nu as well but PPFX has a bunch of static instances that is likely not thread safe~ (just submit jobs lol..)
+    - ~Atleast for FLUGG, this should be easy~
+        - Check `example/flugg_parallel.sh -h`
+    - ~Can do for Dk2Nu as well but PPFX has a bunch of static instances that is likely not thread safe~ 
+        - just submit jobs lol..
