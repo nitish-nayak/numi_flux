@@ -30,7 +30,9 @@ make clean
 - `flugg` : originally available on bluearc
     - FHC : `/nusoft/data/flux/blackbird-numix/flugg_mn000z200i_rp11_lowth_pnut_f11f093bbird_target/root`
     - RHC : `/nusoft/data/flux/blackbird-numix/flugg_mn000z-200i_rp11_lowth_pnut_f11f093bbird_target/root`
-    - Also copied to `/uboone/data/users/bnayak/ppfx/flugg_studies/flugg_files` and `/pnfs/uboone/persistent/users/bnayak/flux_files/flugg_files` (dcache)
+    - Also copied to
+        - `/exp/uboone/data/users/bnayak/ppfx/flugg_studies/flugg_files`
+        - `/pnfs/uboone/persistent/users/bnayak/flux_files/flugg_files` (dcache)
     - See [wiki](https://cdcvs.fnal.gov/redmine/projects/numi-beam-sim/wiki/Locations_of_shared_files) for more information
 
 - `dk2nu` :
@@ -54,5 +56,5 @@ make clean
 - Parallel Processing
     - ~Atleast for FLUGG, this should be easy~
         - Check `example/flugg_parallel.sh -h`
-    - ~Can do for Dk2Nu as well but PPFX has a bunch of static instances that is likely not thread safe~ 
+    - ~Can do for Dk2Nu as well but PPFX has a bunch of static instances that is likely not thread safe~
         - just submit jobs lol..
