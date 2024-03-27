@@ -3,7 +3,7 @@ This was originally a fork of Marco's original NuMIFlux [repo](https://github.co
 - Various simplifications mainly
 - Plan to improve some more areas to ensure easy comparisons
 - Currently, `FluggFlux.cc` looks at FLUGG ntuples and `Dk2NuFlux.cc` looks at Dk2Nu ntuples
-- Check `<flux_type>_example.py` in `example/` directory for example usage
+- Check `<flux_type>_example.py` in `examples/` directory for example usage
 
 ## Instructions
 
@@ -55,6 +55,6 @@ make clean
 - ~Common output interface, currently its replicated across both `<flux_type>` classes~
 - Parallel Processing
     - ~Atleast for FLUGG, this should be easy~
-        - Check `example/flugg_parallel.sh -h`
+        - Check `examples/flugg_parallel.sh -h`
     - ~Can do for Dk2Nu as well but PPFX has a bunch of static instances that is likely not thread safe~
         - just submit jobs lol..
