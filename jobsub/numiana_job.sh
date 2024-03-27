@@ -58,8 +58,8 @@ echo
 FILELIST="input_files.txt"
 box "The input file list is"
 cat "$FILELIST"
-echo "Splitting filelist into chunks of 1 file"
-cat "${FILELIST}" | split -l 1 -a 3 -d
+echo "Splitting filelist into chunks of "${FILES_PER_JOB}" file(s)"
+cat "${FILELIST}" | split -l ${FILES_PER_JOB} -a 3 -d
 job_filelist="x"`printf "%03d" "${PROCESS}"`
 
 box "Filelist for job is : "

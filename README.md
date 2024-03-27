@@ -42,8 +42,9 @@ make clean
     - `-p` : tar and ship local ppfx installation (`$PPFX_DIR` must be set and pointing to local ppfx installation)
     - `-s` : set seed for PPFX universes, pulls PPFX config from `dk2nu/ppfx/inputs_ubnumi_multisim.xml`
         - multisim xml file runs 100 universes currently, modify to run your own set
-    - `-n` : number of jobs to run
-    - `-i` : folder containing input `dk2nu` files. The submission takes the first `n` files and runs `1` file per job
+    - `-n` : number of jobs to run (max 999 jobs for grid script reasons in `jobsub/numiana_job.sh`)
+    - `-f` : number of files per job to run (default 1)
+    - `-i` : folder containing input `dk2nu` files. The submission takes the first `n*f` files and runs `f` file(s) per job
     - `-o` : job output directory
 - Runs `jobsub/numiana_job.sh` on the grid which in turn runs the python macro `jobsub/run_ppfxunivs.py`
 
