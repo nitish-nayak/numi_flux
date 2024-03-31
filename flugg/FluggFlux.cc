@@ -96,6 +96,15 @@ void FluggFlux::CalculateFlux()
 
     double wgt_xy = 0.;  // neutrino weight
     double enu    = 0.;  // neutrino energy in lab frame
+    // I don't know why the neutrino energies would be different but the fact that these are also computed in the weight function worries me a bit
+    // it should be the same as enu above based on the physical quantities used in the calculation (correction from parent COM frame + corrections for muon polarization etc)
+    // but there are various failure modes where this gets reset, which I don't fully understand, so I'm just going to recompute things.. should be free of cost anyway
+    double enu_novand    = 0.;  // neutrino energy in lab frame
+    double enu_minosnd    = 0.;  // neutrino energy in lab frame
+    double enu_minerva    = 0.;  // neutrino energy in lab frame
+    double wgt_novand    = 0.;  // neutrino energy in lab frame
+    double wgt_minosnd    = 0.;  // neutrino energy in lab frame
+    double wgt_minerva    = 0.;  // neutrino energy in lab frame
 
     // Pick a random point in the TPC (in detector coordinates)
     TVector3 xyz_det = RandomInTPC();
@@ -120,8 +129,23 @@ void FluggFlux::CalculateFlux()
     if (ret != 0) std::cout << "Error with CalculateWeight. Return " << ret << std::endl;
     if (fDebug) std::cout << "wgt_xy " << wgt_xy << std::endl;
 
+    int ret_novand = CalculateWeight(fluxNtuple, kNOvA_ND, enu_novand, wgt_novand);
+    if (ret_novand != 0) std::cout << "Error with CalculateWeight. Return " << ret_novand << std::endl;
+    if (fDebug) std::cout << "wgt_novand " << wgt_novand << std::endl;
+
+    int ret_minosnd = CalculateWeight(fluxNtuple, kMINOS_ND, enu_minosnd, wgt_minosnd);
+    if (ret_minosnd != 0) std::cout << "Error with CalculateWeight. Return " << ret_minosnd << std::endl;
+    if (fDebug) std::cout << "wgt_minosnd " << wgt_minosnd << std::endl;
+
+    int ret_minerva = CalculateWeight(fluxNtuple, kMINERvA, enu_minerva, wgt_minerva);
+    if (ret_minerva != 0) std::cout << "Error with CalculateWeight. Return " << ret_minerva << std::endl;
+    if (fDebug) std::cout << "wgt_minerva " << wgt_minerva << std::endl;
+
     //  the total weight
     double weight = wgt_xy * fluxNtuple->Nimpwt * kDefaultWeightCorrection;
+    double weight_novand = wgt_novand * fluxNtuple->Nimpwt * kDefaultWeightCorrection;
+    double weight_minosnd = wgt_minosnd * fluxNtuple->Nimpwt * kDefaultWeightCorrection;
+    double weight_minerva = wgt_minerva * fluxNtuple->Nimpwt * kDefaultWeightCorrection;
 
     // Fill the histograms
     switch (fluxNtuple->Ntype) {
@@ -178,6 +202,13 @@ void FluggFlux::CalculateFlux()
     fOutput->ncascade = fluxNtuple->tgen;
     fOutput->pmedium = fluxNtuple->ppmedium;
     fOutput->decaytype = fluxNtuple->Ndecay;
+
+    fOutput->E_novand = enu_novand;
+    fOutput->E_minosnd = enu_minosnd;
+    fOutput->E_minerva = enu_minerva;
+    fOutput->wgt_novand = weight_novand;
+    fOutput->wgt_minosnd = weight_minosnd;
+    fOutput->wgt_minerva = weight_minerva;
 
     (fOutput->outTree)->Fill();
 

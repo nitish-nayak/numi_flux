@@ -4,6 +4,7 @@
 #pragma once
 
 #include "TMath.h"
+#include "TVector3.h"
 
 const double kNominalPOT = 6.e20;
 const double kDefaultWeightCorrection = 1./(10000. * TMath::Pi());
@@ -68,5 +69,10 @@ const int kgeant_proton     = 14;
 const int kgeant_neutron    = 13;
 
 const double kRDET = 100.0;   // set to flux per 100 cm radius
+
+// Various Centres of Detectors
+const TVector3 kNOvA_ND(1171.75, -331.513, 99293.5);
+const TVector3 kMINERvA(-56.28, -53.2932, 103232);
+const TVector3 kMINOS_ND(0., 0., 103649.);
 
 #endif

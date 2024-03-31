@@ -121,6 +121,15 @@ void Dk2NuFlux::CalculateFlux()
 
     double wgt_xy = 0.;  // neutrino weight
     double enu    = 0.;  // neutrino energy in lab frame
+    // I don't know why the neutrino energies would be different but the fact that these are also computed in the weight function worries me a bit
+    // it should be the same as enu above based on the physical quantities used in the calculation (correction from parent COM frame + corrections for muon polarization etc)
+    // but there are various failure modes where this gets reset, which I don't fully understand, so I'm just going to recompute things.. should be free of cost anyway
+    double enu_novand    = 0.;  // neutrino energy in lab frame
+    double enu_minosnd    = 0.;  // neutrino energy in lab frame
+    double enu_minerva    = 0.;  // neutrino energy in lab frame
+    double wgt_novand    = 0.;  // neutrino energy in lab frame
+    double wgt_minosnd    = 0.;  // neutrino energy in lab frame
+    double wgt_minerva    = 0.;  // neutrino energy in lab frame
 
     // Pick a random point in the TPC (in detector coordinates)
     TVector3 xyz_det = RandomInTPC();
@@ -148,9 +157,23 @@ void Dk2NuFlux::CalculateFlux()
     if (ret != 0) std::cout << "Error with CalculateWeight. Return " << ret << std::endl;
     if (fDebug) std::cout << "wgt_xy " << wgt_xy << std::endl;
 
+    int ret_novand = CalculateWeight(fDk2Nu, kNOvA_ND, enu_novand, wgt_novand);
+    if (ret_novand != 0) std::cout << "Error with CalculateWeight. Return " << ret_novand << std::endl;
+    if (fDebug) std::cout << "wgt_novand " << wgt_novand << std::endl;
+
+    int ret_minosnd = CalculateWeight(fDk2Nu, kMINOS_ND, enu_minosnd, wgt_minosnd);
+    if (ret_minosnd != 0) std::cout << "Error with CalculateWeight. Return " << ret_minosnd << std::endl;
+    if (fDebug) std::cout << "wgt_minosnd " << wgt_minosnd << std::endl;
+
+    int ret_minerva = CalculateWeight(fDk2Nu, kMINERvA, enu_minerva, wgt_minerva);
+    if (ret_minerva != 0) std::cout << "Error with CalculateWeight. Return " << ret_minerva << std::endl;
+    if (fDebug) std::cout << "wgt_minerva " << wgt_minerva << std::endl;
 
     // Calculate the total weight
     double weight = wgt_xy * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
+    double weight_novand = wgt_novand * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
+    double weight_minosnd = wgt_minosnd * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
+    double weight_minerva = wgt_minerva * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
 
     if (std::isnan(weight) == 1) { // catch NaN values
       std::cout << "got a nan: wgt\t" << weight << std::endl;
@@ -161,6 +184,14 @@ void Dk2NuFlux::CalculateFlux()
       std::cout << "got a nan enu:\t" << enu << std::endl;
       enu = 0;
     }
+
+    // don't bother with printouts here
+    weight_novand = std::isnan(weight) ? 0 : weight_novand;
+    weight_minosnd = std::isnan(weight) ? 0 : weight_minosnd;
+    weight_minerva = std::isnan(weight) ? 0 : weight_minerva;
+    enu_novand = std::isnan(enu) ? 0 : enu_novand;
+    enu_minosnd = std::isnan(enu) ? 0 : enu_minosnd;
+    enu_minerva = std::isnan(enu) ? 0 : enu_minerva;
 
     // Fill the histograms
     switch (fDk2Nu->decay.ntype) {
@@ -238,28 +269,6 @@ void Dk2NuFlux::CalculateFlux()
       fOutput->pvz   = id.Vtx[2];
     }
 
-    // // for primary particles, keep flugg calculation (even if slightly in-accurate)
-    // if(fDk2Nu->tgtexit.tgen == 2)
-    //   fOutput->pxF = NuMI::xF(gpvec, pvec);
-    // if(fDk2Nu->tgtexit.tgen > 2) {
-    //   unsigned int pidx = ancestors.size() - 2;
-    //   unsigned int gpidx = ancestors.size() - 3;
-    //
-    //   double pmass = NuMI::MassFromPdgCode(ancestors[pidx].pdg);
-    //   double gpmass = NuMI::MassFromPdgCode(ancestors[gpidx].pdg);
-    //
-    //   double pmom = std::sqrt(pow(ancestors[pidx].startpx, 2.) + pow(ancestors[pidx].startpy, 2.) +
-    //                           pow(ancestors[pidx].startpz, 2.));
-    //   double gpmom = std::sqrt(pow(ancestors[gpidx].startpx, 2.) + pow(ancestors[gpidx].startpy, 2.) +
-    //                            pow(ancestors[gpidx].startpz, 2.));
-    //
-    //   pvec = TLorentzVector(ancestors[pidx].startpx, ancestors[pidx].startpy,
-    //                         ancestors[pidx].startpz, std::sqrt(pow(pmom, 2.) + pow(pmass, 2.)));
-    //   gpvec = TLorentzVector(ancestors[gpidx].startpx, ancestors[gpidx].startpy,
-    //                          ancestors[gpidx].startpz, std::sqrt(pow(gpmom, 2.) + pow(gpmass, 2.)));
-    //   fOutput->pxF = NuMI::xF(gpvec, pvec);
-    // }
-
     fOutput->nuE = enu;
     fOutput->nudirX = nudir_unit.X();
     fOutput->nudirY = nudir_unit.Y();
@@ -274,6 +283,13 @@ void Dk2NuFlux::CalculateFlux()
     fOutput->ncascade = fDk2Nu->tgtexit.tgen;
     fOutput->pmedium = fDk2Nu->decay.ppmedium;
     fOutput->decaytype = fDk2Nu->decay.ndecay;
+
+    fOutput->E_novand = enu_novand;
+    fOutput->E_minosnd = enu_minosnd;
+    fOutput->E_minerva = enu_minerva;
+    fOutput->wgt_novand = weight_novand;
+    fOutput->wgt_minosnd = weight_minosnd;
+    fOutput->wgt_minerva = weight_minerva;
 
     (fOutput->outTree)->Fill();
 

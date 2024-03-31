@@ -62,6 +62,13 @@ RootOutput::RootOutput(std::string outname)
   outTree->Branch("nvx", &nvx, "nvx/F");
   outTree->Branch("nvy", &nvy, "nvy/F");
   outTree->Branch("nvz", &nvz, "nvz/F");
+
+  outTree->Branch("E_novand", &E_novand, "E_novand/F");
+  outTree->Branch("E_minosnd", &E_minosnd, "E_minosnd/F");
+  outTree->Branch("E_minerva", &E_minerva, "E_minerva/F");
+  outTree->Branch("wgt_novand", &wgt_novand, "wgt_novand/F");
+  outTree->Branch("wgt_minosnd", &wgt_minosnd, "wgt_minosnd/F");
+  outTree->Branch("wgt_minerva", &wgt_minerva, "wgt_minerva/F");
 }
 
 //___________________________________________________________________________

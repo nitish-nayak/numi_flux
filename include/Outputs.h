@@ -24,8 +24,12 @@ struct RootOutput
   Float_t nudirY    = -5.;          // neutrino Y direction
   Float_t nudirZ    = -5.;          // neutrino Z direction
   Float_t nuL       = -5.;          // neutrino propagation length
+  // neutrino energies at various locations (should be same as nuE but re-stored for redundancies)
+  Float_t E_novand  = -5.;          // neutrino energy
+  Float_t E_minosnd = -5.;          // neutrino energy
+  Float_t E_minerva = -5.;          // neutrino energy
 
-  Float_t wgt       = 1.;           // weight at location, includes correction for muon polarization
+  Float_t wgt       = 1.;           // weight at location (smeared uboone), includes correction for muon polarization
   Float_t wgt_ppfx  = 1.;           // ppfx CV weight when available (only for dk2nu)
   // breakdowns of ppfx weights
   Float_t wgt_tgtatt = 1.;
@@ -37,6 +41,9 @@ struct RootOutput
   Float_t wgt_ttnucleona = 1.;
   Float_t wgt_ttmesoninc = 1.;
   Float_t wgt_others = 1.;
+  Float_t wgt_novand  = 1.;           // weight at location, includes correction for muon polarization
+  Float_t wgt_minosnd = 1.;           // weight at location, includes correction for muon polarization
+  Float_t wgt_minerva = 1.;           // weight at location, includes correction for muon polarization
 
   // get ppfx multiverse weights as well
   std::vector<Float_t> wgt_ppfxunivs;
