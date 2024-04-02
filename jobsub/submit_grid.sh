@@ -92,7 +92,7 @@ LOGFILE=${OUTDIR}"/numi_flux_log_\${PROCESS}_seed"${SEED}".log"
 
 echo "Logfile is "${LOGFILE}
 echo "Submitting jobs to "$OUTDIR
-jobsub_submit --OS=SL7 \
+jobsub_submit --singularity-image=/cvmfs/singularity.opensciencegrid.org/fermilab/fnal-wn-sl7:latest \
               --resource-provides=usage_model=DEDICATED,OPPORTUNISTIC,ONSITE \
               --role=Analysis --memory=1900MB --expected-lifetime=48h --disk=10GB \
               -N "${NJOBS}" \
