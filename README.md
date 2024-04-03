@@ -58,6 +58,8 @@ make clean
         - Check `examples/flugg_parallel.sh -h`
     - ~Can do for Dk2Nu as well but PPFX has a bunch of static instances that is likely not thread safe~
         - just submit jobs lol..
-    - Check `examples/analyzer_example.C` for analyzing the outputs
+    - ~Parallelism for analyzing output TTrees from this code~
+        - Check `examples/analyzer_example.C` for analyzing the outputs
         - This uses some newer experimental ROOT features like `RDataFrame` and `RVecOps`.
         - I tested this on `root 6.26`, your mileage may vary based on your version
+        - With a good SSD and 15 cores, I'm now able to produce 100 flux universes from 50M neutrinos in about 90s
