@@ -58,3 +58,6 @@ make clean
         - Check `examples/flugg_parallel.sh -h`
     - ~Can do for Dk2Nu as well but PPFX has a bunch of static instances that is likely not thread safe~
         - just submit jobs lol..
+    - Check `examples/analyzer_example.C` for analyzing the outputs
+        - This uses some newer experimental ROOT features like `RDataFrame` and `RVecOps`.
+        - I tested this on `root 6.26`, your mileage may vary based on your version
