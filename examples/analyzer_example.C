@@ -18,6 +18,13 @@ void analyzer_example(std::string pattern, unsigned int nthreads = 1)
   Ana1DHelper helper_cv = Ana1DHelper(*dummy_flux, nthreads);
   Ana1DHelper helper = Ana1DHelper(*dummy_flux, nthreads);
 
+  // fancy indexing is possible but I haven't implemented handling for it yet
+  const int Nunivs = 10;
+  // auto univWgts = [&Nunivs](float wgt, const RVecF &wgt_ppfxunivs){ return wgt*VecOps::Take(wgt_ppfxunivs, Nunivs); }
+  std::vector<Ana1DHelper> helper_univs;
+  for(int iUniv = 0; iUniv < Nunivs; iUniv++)
+      helper_univs.emplace_back(*dummy_flux, nthreads);
+
   // define my selections and apply it to my data
   auto selNumu = [](int ntype){ return ntype == 14; };
   std::cout << "Filtering.." << std::endl;
@@ -28,17 +35,6 @@ void analyzer_example(std::string pattern, unsigned int nthreads = 1)
   f_df = f_df.Define("flux_cv_wgt", cvWgt, {"wgt", "wgt_ppfx"});
 
   // the move is important because the helper class should not survive the event loop
-  RResultPtr<TH1D> r_numu_cv = f_df.Book<float, float>(std::move(helper_cv), {"nuE", "flux_cv_wgt"});
-  RResultPtr<TH1D> r_numu = f_df.Book<float, float>(std::move(helper), {"nuE", "wgt"});
-
-  // fancy indexing is possible but I haven't implemented handling for it yet
-  const int Nunivs = 10;
-  // auto univWgts = [&Nunivs](float wgt, const RVecF &wgt_ppfxunivs){ return wgt*VecOps::Take(wgt_ppfxunivs, Nunivs); }
-  std::vector<Ana1DHelper> helper_univs;
-  for(int iUniv = 0; iUniv < Nunivs; iUniv++)
-      helper_univs.emplace_back(*dummy_flux, nthreads);
-
-
   // book the action
   std::cout << "Booking univs.." << std::endl;
   std::vector<RResultPtr<TH1D>> r_numu_univs;
@@ -51,8 +47,16 @@ void analyzer_example(std::string pattern, unsigned int nthreads = 1)
                                                {"nuE", "flux_univ"+std::to_string(iUniv)+"_wgt"});
     r_numu_univs.emplace_back(r_numu_univ);
   }
+  RResultPtr<TH1D> r_numu_cv = f_df.Book<float, float>(std::move(helper_cv), {"nuE", "flux_cv_wgt"});
+  RResultPtr<TH1D> r_numu = f_df.Book<float, float>(std::move(helper), {"nuE", "wgt"});
+
+  // register some callbacks
+  auto c = f_df.Count();
+  c.OnPartialResult(100000, [](unsigned int n){ std::cout << "===== " << n << " =====" << std::endl; });
 
   // booking is all lazy, the event loop on the dataframe is triggered by trying to access the pointer (for everything)
+  // trigger it here when I dereference c
+  std::cout << "Total Events : " << *c << std::endl;
   std::cout << "CV Flux : " << r_numu_cv->Integral() << std::endl;
   std::cout << "Raw Flux : " << r_numu->Integral() << std::endl;
 
