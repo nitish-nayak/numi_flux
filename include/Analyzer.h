@@ -55,19 +55,24 @@ namespace NuMI {
     void Initialize() {}
     void InitTask(TTreeReader *, unsigned int) {}
 
-    template <typename... ColumnTypes>
-    void Exec(unsigned int slot, ColumnTypes... values)
+    template <typename... DataTypes>
+    void Exec(unsigned int slot, DataTypes... values)
     {
       // first one is val, second one is weight
-      std::array<double, sizeof...(ColumnTypes)> valuesArr{static_cast<double>(values)...};
-      if(valuesArr.size() == 1)
+      // cast everything into double
+      std::array<double, sizeof...(DataTypes)> valuesArr{static_cast<double>(values)...};
+
+      if(valuesArr.size() == 1){
         fHistos[slot]->Fill(valuesArr[0]);
-      else if(valuesArr.size() == 2)
+      }
+      else if(valuesArr.size() == 2){
         fHistos[slot]->Fill(valuesArr[0], valuesArr[1]);
+      }
       else{
-       std::cerr << "Expect two columns as input!! Exiting!" << std::endl;
+       std::cerr << "Expect max two columns (var, wgt) as input!! Exiting!" << std::endl;
        std::exit(1);
       }
+
     }
 
     void Finalize()
