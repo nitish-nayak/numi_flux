@@ -94,11 +94,11 @@ echo "Logfile is "${LOGFILE}
 echo "Submitting jobs to "$OUTDIR
 jobsub_submit --singularity-image=/cvmfs/singularity.opensciencegrid.org/fermilab/fnal-wn-sl7:latest \
               --resource-provides=usage_model=DEDICATED,OPPORTUNISTIC,ONSITE \
-              --role=Analysis --memory=1900MB --expected-lifetime=48h --disk=10GB \
+              --role=Analysis --memory=1900MB --expected-lifetime=48h --disk=20GB \
               -N "${NJOBS}" \
               -d NUMIANA "${OUTDIR}" \
               -G "${EXPERIMENT}" \
-              -e "${FILES_PER_JOB}" \
+              -e FILES_PER_JOB="${FILES_PER_JOB}" \
               -e MACRO="${MACRO}" \
               -e SEED="${SEED}" \
               -f "${TARDIR}"/local_numiflux.tar.gz \
