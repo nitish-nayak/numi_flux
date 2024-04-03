@@ -1,4 +1,5 @@
 #include "../include/Analyzer.h"
+#include "glob.h"
 
 using namespace ROOT;
 using namespace ROOT::RDF;
@@ -6,6 +7,13 @@ using namespace NuMI;
 
 void analyzer_example(std::string pattern, unsigned int nthreads = 1)
 {
+  glob_t glob_result;
+  int result = glob(pattern.c_str(), GLOB_TILDE, NULL, &glob_result);
+  if(result != 0){
+    std::cerr << "Couldn't find files! Exiting!" << std::endl;
+    exit(1);
+  }
+
   nthreads > 1 ? ROOT::EnableImplicitMT(nthreads) : void();
 
   TChain chain("outTree");
@@ -60,8 +68,19 @@ void analyzer_example(std::string pattern, unsigned int nthreads = 1)
   std::cout << "CV Flux : " << r_numu_cv->Integral() << std::endl;
   std::cout << "Raw Flux : " << r_numu->Integral() << std::endl;
 
+  // now do pot
+  TH1D* hPOT = new TH1D("hPOT", "", 1, 0, 1);
+  for(int i = 0; i < (int)glob_result.gl_pathc; i++){
+    TFile* fin = TFile::Open(glob_result.gl_pathv[i], "read");
+    TH1D* h = (TH1D*)fin->Get("POT");
+    hPOT->Add(h);
+    fin->Close();
+  }
+  std::cout << "Total POT : " << hPOT->Integral() << std::endl;
+
   // the histograms now exist so we can save them
   TFile* fout = new TFile("numu_fluxes.root", "recreate");
+  hPOT->Write("POT");
   r_numu_cv->Write("numu_cv");
   r_numu->Write("numu");
   fout->mkdir("univs"); fout->cd("univs");
