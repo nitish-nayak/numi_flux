@@ -32,16 +32,23 @@ namespace NuMI {
       nAna1D++;
       unsigned int nSlots = ROOT::IsImplicitMTEnabled() ? fThreads : 1;
 
-      double nbins = dummy.GetNbinsX();
-      double xlow  = dummy.GetBinLowEdge(1);
-      double xhigh = dummy.GetBinLowEdge(nbins+1);
+      // I hate that ROOT is forcing me to do this
+      // do x
+      int nbinsx = dummy.GetNbinsX();
+      TArrayD xarr(nbinsx+1);
+      if(!dummy.GetXaxis()->IsVariableBinSize()){
+        for(int i = 1; i <= nbinsx+1; i++)
+          xarr[i-1] = dummy.GetXaxis()->GetBinLowEdge(i);
+      }
+      else
+        xarr = *(dummy.GetXaxis()->GetXbins());
       fHistoResult = std::make_shared<TH1D>(TString::Format("%s_id%d_result", dummy.GetName(), nAna1D), dummy.GetTitle(),
-                                            nbins, xlow, xhigh);
+                                            dummy.GetNbinsX(), xarr.GetArray());
 
       for(unsigned int i = 0; i < nSlots; i++) {
         fHistos.emplace_back(std::make_shared<TH1D>(
                              TString::Format("%s_id%d_slot%d", dummy.GetName(), nAna1D, i), dummy.GetTitle(),
-                             nbins, xlow, xhigh)
+                             dummy.GetNbinsX(), xarr.GetArray())
         );
       }
     }
