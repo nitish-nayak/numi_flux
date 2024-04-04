@@ -1,4 +1,4 @@
-#include "../include/Analyzer.h"
+#include "../include/Analyzer1D.h"
 #include "glob.h"
 
 using namespace ROOT;

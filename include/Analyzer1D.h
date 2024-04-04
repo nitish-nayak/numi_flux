@@ -1,9 +1,7 @@
-#ifndef Analyzer_h
-#define Analyzer_h
+#ifndef Analyzer1D_h
+#define Analyzer1D_h
 
 #pragma once
-
-#include "Outputs.h"
 
 #include <iostream>
 #include <iomanip>
@@ -11,36 +9,38 @@
 
 #include <ROOT/RDataFrame.hxx>
 #include <memory>
+#include "IAnalyzer.h"
 
 namespace NuMI {
 
-  static int AnaID;
-  class Ana1DHelper : public ROOT::Detail::RDF::RActionImpl<Ana1DHelper>
+  static int nAna1D;
+  class Ana1DHelper : public IAnalyzer<TH1D, 1>, public ROOT::Detail::RDF::RActionImpl<Ana1DHelper>
   {
   public:
     // we need these
     using Result_t = TH1D;
-  private:
-    std::vector<std::shared_ptr<TH1D>> fHistos; // one per data processing slot
-    std::shared_ptr<TH1D> fHistoResult;
-    const unsigned int fThreads;
+  protected:
+    std::vector<std::shared_ptr<TH1D>> fHistos; // one per data processing slot per NDIM
+    std::shared_ptr<TH1D> fHistoResult; // one per NDIM
+    unsigned int fThreads;
+    unsigned int fDim;
 
   public:
-    Ana1DHelper(const TH1D& dummy, const unsigned int nThreads=1)
-      : fThreads(nThreads)
+    Ana1DHelper(const TH1D& dummy, unsigned int nThreads=1)
+      : IAnalyzer<TH1D, 1>(dummy, nThreads), fThreads(nThreads)
     {
-      AnaID++;
-      const unsigned int nSlots = ROOT::IsImplicitMTEnabled() ? fThreads : 1;
+      nAna1D++;
+      unsigned int nSlots = ROOT::IsImplicitMTEnabled() ? fThreads : 1;
 
-      const double nbins = dummy.GetNbinsX();
-      const double xlow  = dummy.GetBinLowEdge(1);
-      const double xhigh = dummy.GetBinLowEdge(nbins+1);
-      fHistoResult = std::make_shared<TH1D>(TString::Format("%s_id%d_result", dummy.GetName(), AnaID), dummy.GetTitle(),
+      double nbins = dummy.GetNbinsX();
+      double xlow  = dummy.GetBinLowEdge(1);
+      double xhigh = dummy.GetBinLowEdge(nbins+1);
+      fHistoResult = std::make_shared<TH1D>(TString::Format("%s_id%d_result", dummy.GetName(), nAna1D), dummy.GetTitle(),
                                             nbins, xlow, xhigh);
 
       for(unsigned int i = 0; i < nSlots; i++) {
         fHistos.emplace_back(std::make_shared<TH1D>(
-                             TString::Format("%s_id%d_slot%d", dummy.GetName(), AnaID, i), dummy.GetTitle(),
+                             TString::Format("%s_id%d_slot%d", dummy.GetName(), nAna1D, i), dummy.GetTitle(),
                              nbins, xlow, xhigh)
         );
       }
@@ -75,7 +75,7 @@ namespace NuMI {
 
     }
 
-    void Finalize()
+    void Finalize() const
     {
       for(unsigned int i = 0; i < fHistos.size(); i++)
         fHistoResult->Add(fHistos[i].get());
