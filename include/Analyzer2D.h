@@ -81,7 +81,7 @@ namespace NuMI {
       std::array<double, sizeof...(DataTypes)> valuesArr{static_cast<double>(values)...};
 
       if(valuesArr.size() == 2){
-        fHistos[slot]->Fill(valuesArr[0]);
+        fHistos[slot]->Fill(valuesArr[0], valuesArr[1]);
       }
       else if(valuesArr.size() == 3){
         fHistos[slot]->Fill(valuesArr[0], valuesArr[1], valuesArr[2]);
