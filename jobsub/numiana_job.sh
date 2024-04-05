@@ -14,7 +14,6 @@ function setup_localppfx {
 
     echo "Setting up local PPFX"
     export PPFX_DIR=${PWD}
-    source setup_ppfx_grid.sh
 
     cd $CONDOR_DIR_INPUT
 }
