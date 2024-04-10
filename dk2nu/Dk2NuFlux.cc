@@ -186,12 +186,12 @@ void Dk2NuFlux::CalculateFlux()
     }
 
     // don't bother with printouts here
-    weight_novand = std::isnan(weight) ? 0 : weight_novand;
-    weight_minosnd = std::isnan(weight) ? 0 : weight_minosnd;
-    weight_minerva = std::isnan(weight) ? 0 : weight_minerva;
-    enu_novand = std::isnan(enu) ? 0 : enu_novand;
-    enu_minosnd = std::isnan(enu) ? 0 : enu_minosnd;
-    enu_minerva = std::isnan(enu) ? 0 : enu_minerva;
+    weight_novand = std::isnan(weight_novand) ? 0 : weight_novand;
+    weight_minosnd = std::isnan(weight_minosnd) ? 0 : weight_minosnd;
+    weight_minerva = std::isnan(weight_minerva) ? 0 : weight_minerva;
+    enu_novand = std::isnan(enu_novand) ? 0 : enu_novand;
+    enu_minosnd = std::isnan(enu_minosnd) ? 0 : enu_minosnd;
+    enu_minerva = std::isnan(enu_minerva) ? 0 : enu_minerva;
 
     // Fill the histograms
     switch (fDk2Nu->decay.ntype) {
