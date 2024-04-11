@@ -40,6 +40,7 @@ RootOutput::RootOutput(std::string outname)
   outTree->Branch("wgt_ppfxunivs", &wgt_ppfxunivs);
 
   outTree->Branch("ptype", &ptype, "ptype/I");
+  outTree->Branch("gptype", &gptype, "gptype/I");
   outTree->Branch("ntype", &ntype, "ntype/I");
   outTree->Branch("ncascade", &ncascade, "ncascade/I");
   outTree->Branch("pmedium", &pmedium, "pmedium/I");
@@ -58,6 +59,7 @@ RootOutput::RootOutput(std::string outname)
   outTree->Branch("gpPt", &gpPt, "gpPt/F");
   outTree->Branch("gpPz", &gpPz, "gpPz/F");
   outTree->Branch("gpTheta", &gpTheta, "gpTheta/F");
+  outTree->Branch("gpxF", &gpxF, "gpxF/F");
   outTree->Branch("pProc", &pProc);
   outTree->Branch("nvx", &nvx, "nvx/F");
   outTree->Branch("nvy", &nvy, "nvy/F");

@@ -258,10 +258,15 @@ void Dk2NuFlux::CalculateFlux()
       fOutput->pxF = id.xF;
 
       gpvec = TLorentzVector(id.Inc_P4[0], id.Inc_P4[1], id.Inc_P4[2], id.Inc_P4[3]);
+      fOutput->gptype = id.Inc_pdg;
       fOutput->gpE = NuMI::E(gpvec);
       fOutput->gpPt = NuMI::Pt(gpvec);
       fOutput->gpPz = NuMI::Pz(gpvec);
       fOutput->gpTheta = TMath::ACos(NuMI::CosTheta(gpvec));
+      if(nicd >= 3){
+        const InteractionData id_gp = icd.interaction_chain[nicd-3];
+        fOutput->gpxF = id_gp.xF;
+      }
 
       fOutput->pProc = id.Proc;
       fOutput->pvx   = id.Vtx[0];
