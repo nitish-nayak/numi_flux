@@ -49,6 +49,7 @@ struct RootOutput
   std::vector<Float_t> wgt_ppfxunivs;
 
   Int_t ptype       = -1000;        // parent particle code. uses GEANT codes for flugg, PDG for dk2nu
+  Int_t gptype      = -1000;        // grandparent particle code. uses GEANT codes for flugg, PDG for dk2nu
   Int_t ncascade    = -1;           // number of interactions before neutrino, 2 = primary, etc
   Int_t ntype       = -1000;        // neutrino pdg code
   Int_t pmedium     = -1000;        // material codes for neutrino parent projectiles (See MINOS docdb: 9070)
@@ -68,6 +69,7 @@ struct RootOutput
   Float_t gpPt      = -5.;          // grandparent pT in lab frame
   Float_t gpPz      = -5.;          // grandparent pZ in lab frame
   Float_t gpTheta   = -5.;          // grandparent angle (in radians) wrt beamline (z-axis)
+  Float_t gpxF      = -5.;          // grandparent Feynman-x, only available for primary in flugg, dk2nu has for any parent
   Float_t nvx       = -5.;          // neutrino production point x (cm)
   Float_t nvy       = -5.;          // neutrino production point y (cm)
   Float_t nvz       = -5.;          // neutrino production point z (cm)
