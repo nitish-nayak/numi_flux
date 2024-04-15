@@ -285,7 +285,8 @@ void Dk2NuFlux::CalculateFlux()
     fOutput->wgt = weight;
     fOutput->ptype = fDk2Nu->decay.ptype;
     fOutput->ntype = fDk2Nu->decay.ntype;
-    fOutput->ncascade = fDk2Nu->tgtexit.tgen;
+    // fOutput->ncascade = fDk2Nu->tgtexit.tgen;
+    fOutput->ncascade = nicd;
     fOutput->pmedium = fDk2Nu->decay.ppmedium;
     fOutput->decaytype = fDk2Nu->decay.ndecay;
 
