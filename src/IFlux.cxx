@@ -4,7 +4,7 @@
 #include <vector>
 #include <stdlib.h>
 
-#include "TRandom.h"
+#include "TRandom3.h"
 #include "TRotation.h"
 #include "TMath.h"
 #include "TDatime.h"
@@ -16,8 +16,7 @@ using namespace NuMI;
 //___________________________________________________________________________
 TVector3 IFlux::RandomInTPC() const
 {
-  TDatime *d = new TDatime;
-  TRandom *r = new TRandom(d->GetTime());
+  TRandom3 *r = new TRandom3(0);
 
   double xTPC = 256.35;  // cm
   double yTPC = 233.;  // cm
@@ -30,7 +29,6 @@ TVector3 IFlux::RandomInTPC() const
   TVector3 det;
   det.SetXYZ(x,y,z);
 
-  delete d;
   delete r;
 
   return det;
