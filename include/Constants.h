@@ -75,4 +75,11 @@ const TVector3 kNOvA_ND(1171.75, -331.513, 99293.5);
 const TVector3 kMINERvA(-56.28, -53.2932, 103232);
 const TVector3 kMINOS_ND(0., 0., 103649.);
 
+// geodetic
+const TVector3 lp1(47.016657, -91.647625, 179) // lake point 1
+const TVector3 lp2(47.004683, -91.665225, 179) // lake point 2
+const TVector3 th (47.0214787, -91.664325, 203) // two harbors
+const TVector3 lp3(46.980478, -91.610088, 179) // lake point 3 - best
+const TVector3 shs(47.018498, -91.660001, 179) // shore services
+
 #endif

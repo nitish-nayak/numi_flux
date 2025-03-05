@@ -71,6 +71,11 @@ RootOutput::RootOutput(std::string outname)
   outTree->Branch("wgt_novand", &wgt_novand, "wgt_novand/F");
   outTree->Branch("wgt_minosnd", &wgt_minosnd, "wgt_minosnd/F");
   outTree->Branch("wgt_minerva", &wgt_minerva, "wgt_minerva/F");
+  outTree->Branch("wgt_lp1", &wgt_lp1, "wgt_lp1/F");
+  outTree->Branch("wgt_lp2", &wgt_lp2, "wgt_lp2/F");
+  outTree->Branch("wgt_th", &wgt_th, "wgt_th/F");
+  outTree->Branch("wgt_lp3", &wgt_lp3, "wgt_lp3/F");
+  outTree->Branch("wgt_shs", &wgt_shs, "wgt_shs/F");
 }
 
 //___________________________________________________________________________

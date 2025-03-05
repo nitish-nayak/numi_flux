@@ -44,6 +44,11 @@ struct RootOutput
   Float_t wgt_novand  = 1.;           // weight at location, includes correction for muon polarization
   Float_t wgt_minosnd = 1.;           // weight at location, includes correction for muon polarization
   Float_t wgt_minerva = 1.;           // weight at location, includes correction for muon polarization
+  Float_t wgt_lp1 = 1.;
+  Float_t wgt_lp2 = 1.;
+  Float_t wgt_th = 1.;
+  Float_t wgt_lp3 = 1.;
+  Float_t wgt_shs = 1.;
 
   // get ppfx multiverse weights as well
   std::vector<Float_t> wgt_ppfxunivs;

@@ -157,6 +157,50 @@ namespace NuMI {
     }
     return mass;
   }
+
+  //___________________________________________________________________________
+  inline TVector3 EcefFromGeodetic(const double lat_deg, const double lon_deg, const double h)
+  {
+    // WGS84 ellipsoid constants
+    const double a = 6378137.0; // semi-major axis in meters
+    const double f = 1 / 298.257223563; // flattening
+    double e2 = (2 * f) - std::pow(f, 2); // eccentricity squared
+
+    double lat = lat_deg * TMath::Pi()/180.;
+    double lon = lon_deg * TMath::Pi()/180.;
+
+    double sin_lat = TMath::Sin(lat);
+    double N  = a / TMath::Sqrt(1 - e2 * std::pow(sin_lat, 2));
+
+    double x = (N + h) * TMath::Cos(lat) * TMath::Cos(lon);
+    double y = (N + h) * TMath::Cos(lat) * TMath::Sin(lon);
+    double z = ((1 - e2) * N + h) * sin_lat;
+
+    return TVector3(x, y, z);
+  }
+
+  //___________________________________________________________________________
+  inline TVector3 FromGeodeticToBeam(const TVector3& geo)
+  {
+    TVector3 beam;
+    // conversion to beam system
+    TRotation R(-0.90561383, -0.29870372, -0.30106424,
+                -0.00105351, -0.70829763,  0.70591314,
+                -0.42410197,  0.63960187,  0.64112944);
+    TVector3 T(-16541.16447951, -6356836.02154552, 390773.52225127)
+
+    TVector3 ecef = EcefFromGeodetic(geo.X(), geo.Y(), geo.Z());
+    beam = R * ecef + T;
+    beam *= 100.; // convert to cm
+
+    return beam;
+  }
+
+  TVector3 kLP1 = FromGeodeticToBeam(lp1);
+  TVector3 kLP2 = FromGeodeticToBeam(lp2);
+  TVector3 kTH  = FromGeodeticToBeam(th);
+  TVector3 kLP3 = FromGeodeticToBeam(lp3);
+  TVector3 kSHS = FromGeodeticToBeam(shs);
 }
 
 #endif
