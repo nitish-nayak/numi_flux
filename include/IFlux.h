@@ -10,7 +10,9 @@
 #include <string>
 
 #include "TVector3.h"
+#include "TVectorD.h"
 #include "TLorentzVector.h"
+#include "TRotation.h"
 
 namespace NuMI {
 
@@ -182,25 +184,26 @@ namespace NuMI {
   //___________________________________________________________________________
   inline TVector3 FromGeodeticToBeam(const TVector3& geo)
   {
-    TVector3 beam;
+    TVectorD beam(3);
     // conversion to beam system
-    TRotation R(-0.90561383, -0.29870372, -0.30106424,
-                -0.00105351, -0.70829763,  0.70591314,
-                -0.42410197,  0.63960187,  0.64112944);
-    TVector3 T(-16541.16447951, -6356836.02154552, 390773.52225127)
+    TMatrixD R(3, 3);
+    double rot[9] = {-0.90561383, -0.29870372, -0.30106424,
+                     -0.00105351, -0.70829763,  0.70591314,
+                     -0.42410197,  0.63960187,  0.64112944};
+    R.SetMatrixArray(rot);
+
+    double trans[3] = {-16541.16447951, -6356836.02154552, 390773.52225127};
+    TVectorD T(3, trans);
 
     TVector3 ecef = EcefFromGeodetic(geo.X(), geo.Y(), geo.Z());
-    beam = R * ecef + T;
+    double ecef_arr[3] = {ecef.X(), ecef.Y(), ecef.Z()};
+    TVectorD ecefD(3, ecef_arr);
+
+    beam = R * ecefD + T;
     beam *= 100.; // convert to cm
 
-    return beam;
+    return TVector3(beam[0], beam[1], beam[2]);
   }
-
-  TVector3 kLP1 = FromGeodeticToBeam(lp1);
-  TVector3 kLP2 = FromGeodeticToBeam(lp2);
-  TVector3 kTH  = FromGeodeticToBeam(th);
-  TVector3 kLP3 = FromGeodeticToBeam(lp3);
-  TVector3 kSHS = FromGeodeticToBeam(shs);
 }
 
 #endif

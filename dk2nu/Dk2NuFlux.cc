@@ -130,11 +130,11 @@ void Dk2NuFlux::CalculateFlux()
     double wgt_novand    = 0.;  // neutrino energy in lab frame
     double wgt_minosnd    = 0.;  // neutrino energy in lab frame
     double wgt_minerva    = 0.;  // neutrino energy in lab frame
-    double wgt_lp1 = 0. // lake point 1
-    double wgt_lp2 = 0. // lake point 2
-    double wgt_th  = 0. // two harbors
-    double wgt_lp3 = 0. // lake point 3 - best
-    double wgt_shs = 0. // shore services
+    double wgt_lp1 = 0.; // lake point 1
+    double wgt_lp2 = 0.; // lake point 2
+    double wgt_th  = 0.; // two harbors
+    double wgt_lp3 = 0.; // lake point 3 - best
+    double wgt_shs = 0.; // shore services
 
     // Pick a random point in the TPC (in detector coordinates)
     TVector3 xyz_det = RandomInTPC();

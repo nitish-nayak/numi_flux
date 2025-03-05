@@ -76,10 +76,17 @@ const TVector3 kMINERvA(-56.28, -53.2932, 103232);
 const TVector3 kMINOS_ND(0., 0., 103649.);
 
 // geodetic
-const TVector3 lp1(47.016657, -91.647625, 179) // lake point 1
-const TVector3 lp2(47.004683, -91.665225, 179) // lake point 2
-const TVector3 th (47.0214787, -91.664325, 203) // two harbors
-const TVector3 lp3(46.980478, -91.610088, 179) // lake point 3 - best
-const TVector3 shs(47.018498, -91.660001, 179) // shore services
+const TVector3 lp1(47.016657, -91.647625, 179); // lake point 1
+const TVector3 lp2(47.004683, -91.665225, 179); // lake point 2
+const TVector3 th (47.0214787, -91.664325, 203); // two harbors
+const TVector3 lp3(46.980478, -91.610088, 179); // lake point 3 - best
+const TVector3 shs(47.018498, -91.660001, 179); // shore services
+
+// beam coordinates
+const TVector3 kLP1(-24240.925004,535370.162242,63551678.384706);
+const TVector3 kLP2(154706.772929,537639.981952,63491632.787243);
+const TVector3 kTH(65867.435634,533334.336614,63655973.719136);
+const TVector3 kLP3(-102282.011411,555447.164316,63065058.818783);
+const TVector3 kSHS(51066.400745,532794.614208,63611642.022701);
 
 #endif
