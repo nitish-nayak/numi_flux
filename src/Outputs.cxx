@@ -66,16 +66,27 @@ RootOutput::RootOutput(std::string outname)
   outTree->Branch("nvz", &nvz, "nvz/F");
 
   outTree->Branch("E_novand", &E_novand, "E_novand/F");
+  outTree->Branch("E_novafd", &E_novafd, "E_novafd/F");
   outTree->Branch("E_minosnd", &E_minosnd, "E_minosnd/F");
+  outTree->Branch("E_minosfd", &E_minosfd, "E_minosfd/F");
   outTree->Branch("E_minerva", &E_minerva, "E_minerva/F");
   outTree->Branch("wgt_novand", &wgt_novand, "wgt_novand/F");
+  outTree->Branch("wgt_novafd", &wgt_novafd, "wgt_novafd/F");
   outTree->Branch("wgt_minosnd", &wgt_minosnd, "wgt_minosnd/F");
+  outTree->Branch("wgt_minosfd", &wgt_minosfd, "wgt_minosfd/F");
   outTree->Branch("wgt_minerva", &wgt_minerva, "wgt_minerva/F");
   outTree->Branch("wgt_lp1", &wgt_lp1, "wgt_lp1/F");
   outTree->Branch("wgt_lp2", &wgt_lp2, "wgt_lp2/F");
   outTree->Branch("wgt_th", &wgt_th, "wgt_th/F");
   outTree->Branch("wgt_lp3", &wgt_lp3, "wgt_lp3/F");
-  outTree->Branch("wgt_shs", &wgt_shs, "wgt_shs/F");
+  outTree->Branch("wgt_hy", &wgt_hy, "wgt_hy/F");
+  outTree->Branch("wgt_icarus", &wgt_icarus, "wgt_icarus/F");
+  outTree->Branch("E_lp1", &E_lp1, "E_lp1/F");
+  outTree->Branch("E_lp2", &E_lp2, "E_lp2/F");
+  outTree->Branch("E_th", &E_th, "E_th/F");
+  outTree->Branch("E_lp3", &E_lp3, "E_lp3/F");
+  outTree->Branch("E_hy", &E_hy, "E_hy/F");
+  outTree->Branch("E_icarus", &E_icarus, "E_icarus/F");
 }
 
 //___________________________________________________________________________

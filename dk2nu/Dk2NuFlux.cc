@@ -125,16 +125,28 @@ void Dk2NuFlux::CalculateFlux()
     // it should be the same as enu above based on the physical quantities used in the calculation (correction from parent COM frame + corrections for muon polarization etc)
     // but there are various failure modes where this gets reset, which I don't fully understand, so I'm just going to recompute things.. should be free of cost anyway
     double enu_novand    = 0.;  // neutrino energy in lab frame
+    double enu_novafd    = 0.;  // neutrino energy in lab frame
     double enu_minosnd    = 0.;  // neutrino energy in lab frame
+    double enu_minosfd    = 0.;  // neutrino energy in lab frame
     double enu_minerva    = 0.;  // neutrino energy in lab frame
+    double enu_lp1    = 0.;  // neutrino energy in lab frame
+    double enu_lp2    = 0.;  // neutrino energy in lab frame
+    double enu_th    = 0.;  // neutrino energy in lab frame
+    double enu_lp3    = 0.;  // neutrino energy in lab frame
+    double enu_hy    = 0.;  // neutrino energy in lab frame
+    double enu_icarus    = 0.;  // neutrino energy in lab frame
+
     double wgt_novand    = 0.;  // neutrino energy in lab frame
+    double wgt_novafd    = 0.;  // neutrino energy in lab frame
     double wgt_minosnd    = 0.;  // neutrino energy in lab frame
+    double wgt_minosfd    = 0.;  // neutrino energy in lab frame
     double wgt_minerva    = 0.;  // neutrino energy in lab frame
     double wgt_lp1 = 0.; // lake point 1
     double wgt_lp2 = 0.; // lake point 2
     double wgt_th  = 0.; // two harbors
     double wgt_lp3 = 0.; // lake point 3 - best
-    double wgt_shs = 0.; // shore services
+    double wgt_hy = 0.; // shore services
+    double wgt_icarus    = 0.;  // neutrino energy in lab frame
 
     // Pick a random point in the TPC (in detector coordinates)
     TVector3 xyz_det = RandomInTPC();
@@ -166,30 +178,42 @@ void Dk2NuFlux::CalculateFlux()
     if (ret_novand != 0) std::cout << "Error with CalculateWeight. Return " << ret_novand << std::endl;
     if (fDebug) std::cout << "wgt_novand " << wgt_novand << std::endl;
 
+    int ret_novafd = CalculateWeight(fDk2Nu, kNOvA_FD, enu_novafd, wgt_novafd);
+    if (ret_novafd != 0) std::cout << "Error with CalculateWeight. Return " << ret_novafd << std::endl;
+    if (fDebug) std::cout << "wgt_novafd " << wgt_novafd << std::endl;
+
     int ret_minosnd = CalculateWeight(fDk2Nu, kMINOS_ND, enu_minosnd, wgt_minosnd);
     if (ret_minosnd != 0) std::cout << "Error with CalculateWeight. Return " << ret_minosnd << std::endl;
     if (fDebug) std::cout << "wgt_minosnd " << wgt_minosnd << std::endl;
+
+    int ret_minosfd = CalculateWeight(fDk2Nu, kMINOS_FD, enu_minosfd, wgt_minosfd);
+    if (ret_minosfd != 0) std::cout << "Error with CalculateWeight. Return " << ret_minosfd << std::endl;
+    if (fDebug) std::cout << "wgt_minosfd " << wgt_minosfd << std::endl;
 
     int ret_minerva = CalculateWeight(fDk2Nu, kMINERvA, enu_minerva, wgt_minerva);
     if (ret_minerva != 0) std::cout << "Error with CalculateWeight. Return " << ret_minerva << std::endl;
     if (fDebug) std::cout << "wgt_minerva " << wgt_minerva << std::endl;
 
-    int ret_lp1 = CalculateWeight(fDk2Nu, kLP1, enu, wgt_lp1);
-    int ret_lp2 = CalculateWeight(fDk2Nu, kLP2, enu, wgt_lp2);
-    int ret_th = CalculateWeight(fDk2Nu, kTH, enu, wgt_th);
-    int ret_lp3 = CalculateWeight(fDk2Nu, kLP3, enu, wgt_lp3);
-    int ret_shs = CalculateWeight(fDk2Nu, kSHS, enu, wgt_shs);
+    int ret_lp1 = CalculateWeight(fDk2Nu, kLP1, enu_lp1, wgt_lp1);
+    int ret_lp2 = CalculateWeight(fDk2Nu, kLP2, enu_lp2, wgt_lp2);
+    int ret_th = CalculateWeight(fDk2Nu, kTH, enu_th, wgt_th);
+    int ret_lp3 = CalculateWeight(fDk2Nu, kLP3, enu_lp3, wgt_lp3);
+    int ret_hy = CalculateWeight(fDk2Nu, kHY, enu_hy, wgt_hy);
+    int ret_icarus = CalculateWeight(fDk2Nu, kICARUS, enu_icarus, wgt_icarus);
 
     // Calculate the total weight
     double weight = wgt_xy * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
     double weight_novand = wgt_novand * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
+    double weight_novafd = wgt_novafd * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
     double weight_minosnd = wgt_minosnd * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
+    double weight_minosfd = wgt_minosfd * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
     double weight_minerva = wgt_minerva * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
     double weight_lp1 = wgt_lp1 * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
     double weight_lp2 = wgt_lp2 * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
     double weight_lp3 = wgt_lp3 * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
     double weight_th = wgt_th * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
-    double weight_shs = wgt_shs * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
+    double weight_hy = wgt_hy * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
+    double weight_icarus = wgt_icarus * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
 
     if (std::isnan(weight) == 1) { // catch NaN values
       std::cout << "got a nan: wgt\t" << weight << std::endl;
@@ -203,16 +227,28 @@ void Dk2NuFlux::CalculateFlux()
 
     // don't bother with printouts here
     weight_novand = std::isnan(weight) ? 0 : weight_novand;
+    weight_novafd = std::isnan(weight) ? 0 : weight_novafd;
     weight_minosnd = std::isnan(weight) ? 0 : weight_minosnd;
+    weight_minosfd = std::isnan(weight) ? 0 : weight_minosfd;
     weight_minerva = std::isnan(weight) ? 0 : weight_minerva;
     weight_lp1 = std::isnan(weight) ? 0 : weight_lp1;
     weight_lp2 = std::isnan(weight) ? 0 : weight_lp2;
     weight_lp3 = std::isnan(weight) ? 0 : weight_lp3;
     weight_th = std::isnan(weight) ? 0 : weight_th;
-    weight_shs = std::isnan(weight) ? 0 : weight_shs;
+    weight_hy = std::isnan(weight) ? 0 : weight_hy;
+    weight_icarus = std::isnan(weight) ? 0 : weight_icarus;
+
     enu_novand = std::isnan(enu) ? 0 : enu_novand;
+    enu_novafd = std::isnan(enu) ? 0 : enu_novafd;
     enu_minosnd = std::isnan(enu) ? 0 : enu_minosnd;
+    enu_minosfd = std::isnan(enu) ? 0 : enu_minosfd;
     enu_minerva = std::isnan(enu) ? 0 : enu_minerva;
+    enu_lp1 = std::isnan(enu) ? 0 : enu_lp1;
+    enu_lp2 = std::isnan(enu) ? 0 : enu_lp2;
+    enu_lp3 = std::isnan(enu) ? 0 : enu_lp3;
+    enu_th = std::isnan(enu) ? 0 : enu_th;
+    enu_hy = std::isnan(enu) ? 0 : enu_hy;
+    enu_icarus = std::isnan(enu) ? 0 : enu_icarus;
 
     // Fill the histograms
     switch (fDk2Nu->decay.ntype) {
@@ -312,16 +348,27 @@ void Dk2NuFlux::CalculateFlux()
     fOutput->decaytype = fDk2Nu->decay.ndecay;
 
     fOutput->E_novand = enu_novand;
+    fOutput->E_novafd = enu_novafd;
     fOutput->E_minosnd = enu_minosnd;
+    fOutput->E_minosfd = enu_minosfd;
     fOutput->E_minerva = enu_minerva;
     fOutput->wgt_novand = weight_novand;
+    fOutput->wgt_novafd = weight_novafd;
     fOutput->wgt_minosnd = weight_minosnd;
+    fOutput->wgt_minosfd = weight_minosfd;
     fOutput->wgt_minerva = weight_minerva;
     fOutput->wgt_lp1 = weight_lp1;
     fOutput->wgt_lp2 = weight_lp2;
     fOutput->wgt_lp3 = weight_lp3;
     fOutput->wgt_th = weight_th;
-    fOutput->wgt_shs = weight_shs;
+    fOutput->wgt_hy = weight_hy;
+    fOutput->wgt_icarus = weight_icarus;
+    fOutput->E_lp1 = enu_lp1;
+    fOutput->E_lp2 = enu_lp2;
+    fOutput->E_lp3 = enu_lp3;
+    fOutput->E_th = enu_th;
+    fOutput->E_hy = enu_hy;
+    fOutput->E_icarus = enu_icarus;
 
     (fOutput->outTree)->Fill();
 
