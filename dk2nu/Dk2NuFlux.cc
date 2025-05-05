@@ -133,7 +133,7 @@ void Dk2NuFlux::CalculateFlux()
     double enu_lp2    = 0.;  // neutrino energy in lab frame
     double enu_th    = 0.;  // neutrino energy in lab frame
     double enu_lp3    = 0.;  // neutrino energy in lab frame
-    double enu_hy    = 0.;  // neutrino energy in lab frame
+    double enu_ww    = 0.;  // neutrino energy in lab frame
     double enu_icarus    = 0.;  // neutrino energy in lab frame
 
     double wgt_novand    = 0.;  // neutrino energy in lab frame
@@ -145,7 +145,7 @@ void Dk2NuFlux::CalculateFlux()
     double wgt_lp2 = 0.; // lake point 2
     double wgt_th  = 0.; // two harbors
     double wgt_lp3 = 0.; // lake point 3 - best
-    double wgt_hy = 0.; // shore services
+    double wgt_ww = 0.; // shore services
     double wgt_icarus    = 0.;  // neutrino energy in lab frame
 
     // Pick a random point in the TPC (in detector coordinates)
@@ -198,7 +198,7 @@ void Dk2NuFlux::CalculateFlux()
     int ret_lp2 = CalculateWeight(fDk2Nu, kLP2, enu_lp2, wgt_lp2);
     int ret_th = CalculateWeight(fDk2Nu, kTH, enu_th, wgt_th);
     int ret_lp3 = CalculateWeight(fDk2Nu, kLP3, enu_lp3, wgt_lp3);
-    int ret_hy = CalculateWeight(fDk2Nu, kHY, enu_hy, wgt_hy);
+    int ret_ww = CalculateWeight(fDk2Nu, kWW, enu_ww, wgt_ww);
     int ret_icarus = CalculateWeight(fDk2Nu, kICARUS, enu_icarus, wgt_icarus);
 
     // Calculate the total weight
@@ -212,7 +212,7 @@ void Dk2NuFlux::CalculateFlux()
     double weight_lp2 = wgt_lp2 * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
     double weight_lp3 = wgt_lp3 * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
     double weight_th = wgt_th * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
-    double weight_hy = wgt_hy * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
+    double weight_ww = wgt_ww * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
     double weight_icarus = wgt_icarus * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
 
     if (std::isnan(weight) == 1) { // catch NaN values
@@ -235,7 +235,7 @@ void Dk2NuFlux::CalculateFlux()
     weight_lp2 = std::isnan(weight) ? 0 : weight_lp2;
     weight_lp3 = std::isnan(weight) ? 0 : weight_lp3;
     weight_th = std::isnan(weight) ? 0 : weight_th;
-    weight_hy = std::isnan(weight) ? 0 : weight_hy;
+    weight_ww = std::isnan(weight) ? 0 : weight_ww;
     weight_icarus = std::isnan(weight) ? 0 : weight_icarus;
 
     enu_novand = std::isnan(enu) ? 0 : enu_novand;
@@ -247,7 +247,7 @@ void Dk2NuFlux::CalculateFlux()
     enu_lp2 = std::isnan(enu) ? 0 : enu_lp2;
     enu_lp3 = std::isnan(enu) ? 0 : enu_lp3;
     enu_th = std::isnan(enu) ? 0 : enu_th;
-    enu_hy = std::isnan(enu) ? 0 : enu_hy;
+    enu_ww = std::isnan(enu) ? 0 : enu_ww;
     enu_icarus = std::isnan(enu) ? 0 : enu_icarus;
 
     // Fill the histograms
@@ -361,13 +361,13 @@ void Dk2NuFlux::CalculateFlux()
     fOutput->wgt_lp2 = weight_lp2;
     fOutput->wgt_lp3 = weight_lp3;
     fOutput->wgt_th = weight_th;
-    fOutput->wgt_hy = weight_hy;
+    fOutput->wgt_ww = weight_ww;
     fOutput->wgt_icarus = weight_icarus;
     fOutput->E_lp1 = enu_lp1;
     fOutput->E_lp2 = enu_lp2;
     fOutput->E_lp3 = enu_lp3;
     fOutput->E_th = enu_th;
-    fOutput->E_hy = enu_hy;
+    fOutput->E_ww = enu_ww;
     fOutput->E_icarus = enu_icarus;
 
     (fOutput->outTree)->Fill();

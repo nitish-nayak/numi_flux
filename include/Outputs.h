@@ -34,7 +34,7 @@ struct RootOutput
   Float_t E_lp2 = -5.;          // neutrino energy
   Float_t E_th = -5.;          // neutrino energy
   Float_t E_lp3 = -5.;          // neutrino energy
-  Float_t E_hy = -5.;          // neutrino energy
+  Float_t E_ww = -5.;          // neutrino energy
   Float_t E_icarus = -5.;          // neutrino energy
 
   Float_t wgt       = 1.;           // weight at location (smeared uboone), includes correction for muon polarization
@@ -58,7 +58,7 @@ struct RootOutput
   Float_t wgt_lp2 = 1.;
   Float_t wgt_th = 1.;
   Float_t wgt_lp3 = 1.;
-  Float_t wgt_hy = 1.;
+  Float_t wgt_ww = 1.;
   Float_t wgt_icarus = 1.;
 
   // get ppfx multiverse weights as well

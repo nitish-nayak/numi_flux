@@ -79,13 +79,13 @@ RootOutput::RootOutput(std::string outname)
   outTree->Branch("wgt_lp2", &wgt_lp2, "wgt_lp2/F");
   outTree->Branch("wgt_th", &wgt_th, "wgt_th/F");
   outTree->Branch("wgt_lp3", &wgt_lp3, "wgt_lp3/F");
-  outTree->Branch("wgt_hy", &wgt_hy, "wgt_hy/F");
+  outTree->Branch("wgt_ww", &wgt_ww, "wgt_ww/F");
   outTree->Branch("wgt_icarus", &wgt_icarus, "wgt_icarus/F");
   outTree->Branch("E_lp1", &E_lp1, "E_lp1/F");
   outTree->Branch("E_lp2", &E_lp2, "E_lp2/F");
   outTree->Branch("E_th", &E_th, "E_th/F");
   outTree->Branch("E_lp3", &E_lp3, "E_lp3/F");
-  outTree->Branch("E_hy", &E_hy, "E_hy/F");
+  outTree->Branch("E_ww", &E_ww, "E_ww/F");
   outTree->Branch("E_icarus", &E_icarus, "E_icarus/F");
 }
 
