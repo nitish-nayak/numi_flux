@@ -49,6 +49,3 @@ make clean
     - `-i` : folder containing input `dk2nu` files. The submission takes the first `n*f` files and runs `f` file(s) per job
     - `-o` : job output directory
 - Runs `jobsub/numiana_job.sh` on the grid which in turn runs the python macro `jobsub/run_ppfxunivs.py`
-        - This uses some newer experimental ROOT features like `RDataFrame` and `RVecOps`.
-        - I tested this on `root 6.26`, your mileage may vary based on your version
-        - With a good SSD and 15 cores, I'm now able to produce 100 flux universes from 50M neutrinos in about 90s
