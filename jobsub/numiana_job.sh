@@ -64,9 +64,15 @@ job_filelist="x"`printf "%03d" "${PROCESS}"`
 box "Filelist for job is : "
 cat "$job_filelist"
 
+box "Copying files to grid node with IFDH"
+for i in `cat "$job_filelist"`; do
+    ifdh cp "$i" `basename "$i"`
+    echo `basename "$i"` >> "run_files_${PROCESS}.txt"
+done
+
 echo
 box "Running python macro for process : "${PROCESS}
-python "${MACRO}" "${job_filelist}" "${SEED}"
+python "${MACRO}" "run_files_${PROCESS}.txt" "${SEED}"
 
 echo
 box "Copying output file"
