@@ -30,12 +30,10 @@ struct RootOutput
   Float_t E_minosnd = -5.;          // neutrino energy
   Float_t E_minosfd = -5.;          // neutrino energy
   Float_t E_minerva = -5.;          // neutrino energy
-  Float_t E_lp1 = -5.;          // neutrino energy
-  Float_t E_lp2 = -5.;          // neutrino energy
-  Float_t E_th = -5.;          // neutrino energy
-  Float_t E_lp3 = -5.;          // neutrino energy
-  Float_t E_ww = -5.;          // neutrino energy
-  Float_t E_icarus = -5.;          // neutrino energy
+  Float_t E_lp3 = -5.;              // neutrino energy
+  Float_t E_ww = -5.;               // neutrino energy
+  Float_t E_mu2e = -5.;             // neutrino energy
+  Float_t E_icarus = -5.;           // neutrino energy
 
   Float_t wgt       = 1.;           // weight at location (smeared uboone), includes correction for muon polarization
   Float_t wgt_ppfx  = 1.;           // ppfx CV weight when available (only for dk2nu)
@@ -54,11 +52,9 @@ struct RootOutput
   Float_t wgt_minosnd = 1.;           // weight at location, includes correction for muon polarization
   Float_t wgt_minosfd = 1.;           // weight at location, includes correction for muon polarization
   Float_t wgt_minerva = 1.;           // weight at location, includes correction for muon polarization
-  Float_t wgt_lp1 = 1.;
-  Float_t wgt_lp2 = 1.;
-  Float_t wgt_th = 1.;
   Float_t wgt_lp3 = 1.;
   Float_t wgt_ww = 1.;
+  Float_t wgt_mu2e = 1.;
   Float_t wgt_icarus = 1.;
 
   // get ppfx multiverse weights as well

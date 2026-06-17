@@ -79,19 +79,13 @@ const TVector3 kICARUS(450.37, 7991.98, 79512.66);
 const TVector3 kNOvA_FD(1103729.6, -416255.7, 81042232.);
 
 // geodetic
-const TVector3 lp1(47.016657, -91.647625, 179); // lake point 1
-const TVector3 lp2(47.004683, -91.665225, 179); // lake point 2
-const TVector3 th (47.0214787, -91.664325, 203); // two harbors
-const TVector3 lp3(46.980478, -91.610088, -21); // lake point 3 - best (200m depth)
-const TVector3 shs(47.018498, -91.660001, 179); // shore services
+const TVector3 lp3(46.97667, -91.63, -26); // lake point 3 - best (205m depth)
 const TVector3 ww(47.5799917,-92.13172222222221,426.72); // Wentworth Mines near Hoyt Lake
+const TVector3 mu2e(41.83642, -88.26591, 220.5); // mu2e building
 
 // beam coordinates
-const TVector3 kLP1(-24240.925004,535370.162242,63551678.384706);
-const TVector3 kLP2(154706.772929,537639.981952,63491632.787243);
-const TVector3 kTH(65867.435634,533334.336614,63655973.719136);
-const TVector3 kLP3( -102303.94038275,535462.40995564,63064246.35882203);
-const TVector3 kSHS(51066.400745,532794.614208,63611642.022701);
+const TVector3 kLP3(5.22934216e+04, 5.33613691e+05, 6.30932580e+07);
 const TVector3 kWW(463385.940369,218369.59832702,70783287.84328832);
+const TVector3 kMu2E(-17213.14485607, 5806.38829935, 43797.08744634);
 
 #endif

@@ -194,11 +194,9 @@ void Dk2NuFlux::CalculateFlux()
     if (ret_minerva != 0) std::cout << "Error with CalculateWeight. Return " << ret_minerva << std::endl;
     if (fDebug) std::cout << "wgt_minerva " << wgt_minerva << std::endl;
 
-    int ret_lp1 = CalculateWeight(fDk2Nu, kLP1, enu_lp1, wgt_lp1);
-    int ret_lp2 = CalculateWeight(fDk2Nu, kLP2, enu_lp2, wgt_lp2);
-    int ret_th = CalculateWeight(fDk2Nu, kTH, enu_th, wgt_th);
     int ret_lp3 = CalculateWeight(fDk2Nu, kLP3, enu_lp3, wgt_lp3);
     int ret_ww = CalculateWeight(fDk2Nu, kWW, enu_ww, wgt_ww);
+    int ret_mu2e = CalculateWeight(fDk2Nu, kMu2E, enu_mu2e, wgt_mu2e);
     int ret_icarus = CalculateWeight(fDk2Nu, kICARUS, enu_icarus, wgt_icarus);
 
     // Calculate the total weight
@@ -208,11 +206,9 @@ void Dk2NuFlux::CalculateFlux()
     double weight_minosnd = wgt_minosnd * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
     double weight_minosfd = wgt_minosfd * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
     double weight_minerva = wgt_minerva * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
-    double weight_lp1 = wgt_lp1 * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
-    double weight_lp2 = wgt_lp2 * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
     double weight_lp3 = wgt_lp3 * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
-    double weight_th = wgt_th * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
     double weight_ww = wgt_ww * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
+    double weight_mu2e = wgt_mu2e * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
     double weight_icarus = wgt_icarus * fDk2Nu->decay.nimpwt * kDefaultWeightCorrection;
 
     if (std::isnan(weight) == 1) { // catch NaN values
@@ -231,11 +227,9 @@ void Dk2NuFlux::CalculateFlux()
     weight_minosnd = std::isnan(weight) ? 0 : weight_minosnd;
     weight_minosfd = std::isnan(weight) ? 0 : weight_minosfd;
     weight_minerva = std::isnan(weight) ? 0 : weight_minerva;
-    weight_lp1 = std::isnan(weight) ? 0 : weight_lp1;
-    weight_lp2 = std::isnan(weight) ? 0 : weight_lp2;
     weight_lp3 = std::isnan(weight) ? 0 : weight_lp3;
-    weight_th = std::isnan(weight) ? 0 : weight_th;
     weight_ww = std::isnan(weight) ? 0 : weight_ww;
+    weight_mu2e = std::isnan(weight) ? 0 : weight_mu2e;
     weight_icarus = std::isnan(weight) ? 0 : weight_icarus;
 
     enu_novand = std::isnan(enu) ? 0 : enu_novand;
@@ -243,11 +237,9 @@ void Dk2NuFlux::CalculateFlux()
     enu_minosnd = std::isnan(enu) ? 0 : enu_minosnd;
     enu_minosfd = std::isnan(enu) ? 0 : enu_minosfd;
     enu_minerva = std::isnan(enu) ? 0 : enu_minerva;
-    enu_lp1 = std::isnan(enu) ? 0 : enu_lp1;
-    enu_lp2 = std::isnan(enu) ? 0 : enu_lp2;
     enu_lp3 = std::isnan(enu) ? 0 : enu_lp3;
-    enu_th = std::isnan(enu) ? 0 : enu_th;
     enu_ww = std::isnan(enu) ? 0 : enu_ww;
+    enu_mu2e = std::isnan(enu) ? 0 : enu_mu2e;
     enu_icarus = std::isnan(enu) ? 0 : enu_icarus;
 
     // Fill the histograms
@@ -357,17 +349,13 @@ void Dk2NuFlux::CalculateFlux()
     fOutput->wgt_minosnd = weight_minosnd;
     fOutput->wgt_minosfd = weight_minosfd;
     fOutput->wgt_minerva = weight_minerva;
-    fOutput->wgt_lp1 = weight_lp1;
-    fOutput->wgt_lp2 = weight_lp2;
     fOutput->wgt_lp3 = weight_lp3;
-    fOutput->wgt_th = weight_th;
     fOutput->wgt_ww = weight_ww;
+    fOutput->wgt_mu2e = weight_mu2e;
     fOutput->wgt_icarus = weight_icarus;
-    fOutput->E_lp1 = enu_lp1;
-    fOutput->E_lp2 = enu_lp2;
     fOutput->E_lp3 = enu_lp3;
-    fOutput->E_th = enu_th;
     fOutput->E_ww = enu_ww;
+    fOutput->E_mu2e = enu_mu2e;
     fOutput->E_icarus = enu_icarus;
 
     (fOutput->outTree)->Fill();

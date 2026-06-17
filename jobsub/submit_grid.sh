@@ -10,10 +10,10 @@ fi
 
 # defaults
 SEED=42
-NJOBS=200
+NJOBS=450
 FILES_PER_JOB=1
-FILEPATH="/pnfs/uboone/persistent/users/bnayak/flux_files/uboone_geometrybugfix/me000z200i/run0/files"
-OUTDIR="/pnfs/"${EXPERIMENT}"/scratch/users/"${USER}"/test_numiana"
+FILEPATH="/pnfs/uboone/persistent/users/uboonepro/numi_nothresh_flux_kdarfix/g4numi_g4_10_4_p02d_nothresh/me000z-200i/run0/files"
+OUTDIR="/pnfs/"${EXPERIMENT}"/scratch/users/"${USER}"/numiana_kdarfix/rhc"
 
 usage() { echo "Usage: $0 [-p] [-s SEED] [-n NJOBS] [-f FILES_PER_JOB] [-i INPUT_FILELIST] [-o OUTPUT_DIR]" 1>&2; exit 1; }
 
@@ -86,7 +86,7 @@ fi
 
 TOT_FILES=$(bc -l <<< "${NJOBS}"*"${FILES_PER_JOB}")
 box "Making filelist from "${FILEPATH}" for "${TOT_FILES}" files with "${NJOBS}" jobs.."
-ls "${FILEPATH}"/*.root | head -n ${TOT_FILES} | xargs pnfsToXRootD >> jobsub/tmp/input_files.txt
+ls "${FILEPATH}"/*.root | head -n ${TOT_FILES} >> jobsub/tmp/input_files.txt
 
 LOGFILE=${OUTDIR}"/numi_flux_log_\${PROCESS}_seed"${SEED}".log"
 

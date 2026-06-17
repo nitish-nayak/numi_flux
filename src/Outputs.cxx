@@ -75,17 +75,13 @@ RootOutput::RootOutput(std::string outname)
   outTree->Branch("wgt_minosnd", &wgt_minosnd, "wgt_minosnd/F");
   outTree->Branch("wgt_minosfd", &wgt_minosfd, "wgt_minosfd/F");
   outTree->Branch("wgt_minerva", &wgt_minerva, "wgt_minerva/F");
-  outTree->Branch("wgt_lp1", &wgt_lp1, "wgt_lp1/F");
-  outTree->Branch("wgt_lp2", &wgt_lp2, "wgt_lp2/F");
-  outTree->Branch("wgt_th", &wgt_th, "wgt_th/F");
   outTree->Branch("wgt_lp3", &wgt_lp3, "wgt_lp3/F");
   outTree->Branch("wgt_ww", &wgt_ww, "wgt_ww/F");
+  outTree->Branch("wgt_mu2e", &wgt_mu2e, "wgt_mu2e/F");
   outTree->Branch("wgt_icarus", &wgt_icarus, "wgt_icarus/F");
-  outTree->Branch("E_lp1", &E_lp1, "E_lp1/F");
-  outTree->Branch("E_lp2", &E_lp2, "E_lp2/F");
-  outTree->Branch("E_th", &E_th, "E_th/F");
   outTree->Branch("E_lp3", &E_lp3, "E_lp3/F");
   outTree->Branch("E_ww", &E_ww, "E_ww/F");
+  outTree->Branch("E_mu2e", &E_mu2e, "E_mu2e/F");
   outTree->Branch("E_icarus", &E_icarus, "E_icarus/F");
 }
 

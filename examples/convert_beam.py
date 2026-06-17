@@ -84,12 +84,8 @@ if __name__ == "__main__":
     print(T)
 
     # Now, for a new GPS coordinate, compute its ECEF coordinates and map to the target system.
-    lp1 = (47.016657, -91.647625, 179) # lake point 1
-    lp2 = (47.004683, -91.665225, 179) # lake point 2
-    th  = (47.0214787, -91.664325, 203) # two harbors
-    lp3 = (46.980478, -91.610088, 179) # lake point 3 - best
-    shs = (47.018498, -91.660001, 179)
-    new_gps = lp3
+    lp3_latest = (41.83642, -88.26591, 220.5)
+    new_gps = lp3_latest
 
     new_ecef = geodetic_to_ecef(*new_gps)
     print("\nNew GPS Coordinate (ECEF system):")
