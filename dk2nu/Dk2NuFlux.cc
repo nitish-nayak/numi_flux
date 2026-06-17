@@ -129,11 +129,9 @@ void Dk2NuFlux::CalculateFlux()
     double enu_minosnd    = 0.;  // neutrino energy in lab frame
     double enu_minosfd    = 0.;  // neutrino energy in lab frame
     double enu_minerva    = 0.;  // neutrino energy in lab frame
-    double enu_lp1    = 0.;  // neutrino energy in lab frame
-    double enu_lp2    = 0.;  // neutrino energy in lab frame
-    double enu_th    = 0.;  // neutrino energy in lab frame
     double enu_lp3    = 0.;  // neutrino energy in lab frame
     double enu_ww    = 0.;  // neutrino energy in lab frame
+    double enu_mu2e    = 0.;  // neutrino energy in lab frame
     double enu_icarus    = 0.;  // neutrino energy in lab frame
 
     double wgt_novand    = 0.;  // neutrino energy in lab frame
@@ -141,11 +139,9 @@ void Dk2NuFlux::CalculateFlux()
     double wgt_minosnd    = 0.;  // neutrino energy in lab frame
     double wgt_minosfd    = 0.;  // neutrino energy in lab frame
     double wgt_minerva    = 0.;  // neutrino energy in lab frame
-    double wgt_lp1 = 0.; // lake point 1
-    double wgt_lp2 = 0.; // lake point 2
-    double wgt_th  = 0.; // two harbors
     double wgt_lp3 = 0.; // lake point 3 - best
-    double wgt_ww = 0.; // shore services
+    double wgt_ww = 0.; //  wentworth mine
+    double wgt_mu2e = 0.; // mu2e
     double wgt_icarus    = 0.;  // neutrino energy in lab frame
 
     // Pick a random point in the TPC (in detector coordinates)
